@@ -1,27 +1,30 @@
 const https = require('https');
 
 exports.handler = async function(event, context) {
-  // Only allow POST
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  // Get API key from environment variable — never hardcoded
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return { statusCode: 500, body: JSON.stringify({ error: 'API key not configured' }) };
   }
 
-  // Parse the incoming request body
-  let body;
-  try {
-    body = JSON.parse(event.body);
-  } catch (e) {
-    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body' }) };
+  // Netlify may base64-encode the body for large/binary requests
+  let rawBody = event.body;
+  if (event.isBase64Encoded) {
+    rawBody = Buffer.from(rawBody, 'base64').toString('utf8');
   }
 
-  // Forward to Anthropic API
+  let body;
+  try {
+    body = JSON.parse(rawBody);
+  } catch (e) {
+    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request body: ' + e.message }) };
+  }
+
   const payload = JSON.stringify(body);
+  const payloadBuffer = Buffer.from(payload, 'utf8');
 
   return new Promise((resolve) => {
     const options = {
@@ -32,14 +35,15 @@ exports.handler = async function(event, context) {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
-        'Content-Length': Buffer.byteLength(payload)
+        'Content-Length': payloadBuffer.length
       }
     };
 
     const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => { data += chunk; });
+      const chunks = [];
+      res.on('data', (chunk) => { chunks.push(chunk); });
       res.on('end', () => {
+        const data = Buffer.concat(chunks).toString('utf8');
         resolve({
           statusCode: res.statusCode,
           headers: { 'Content-Type': 'application/json' },
@@ -55,7 +59,7 @@ exports.handler = async function(event, context) {
       });
     });
 
-    req.write(payload);
+    req.write(payloadBuffer);
     req.end();
   });
 };
