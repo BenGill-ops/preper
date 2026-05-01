@@ -515,7 +515,7 @@ var DEFAULT_MEALS={
   ]
 };
 
-var DEFAULT_PANTRY=['Olive oil','Vegetable oil','Salt','Black pepper','Garlic powder','Paprika','Cumin','Dried oregano','Chilli flakes','Soy sauce','Fish sauce','Oyster sauce','Hoisin sauce','Worcestershire sauce','Sesame oil','Tomato paste','Chicken stock','Beef stock','Plain flour','Cornflour','Breadcrumbs','Sugar','Brown sugar','Rice','Pasta','Spaghetti','Canned tomatoes','Butter','Eggs','Milk','Onions','Garlic','Sesame seeds'];
+var DEFAULT_PANTRY=['Olive oil','Vegetable oil','Coconut oil','Salt','Black pepper','Garlic powder','Onion powder','Paprika','Smoked paprika','Cumin','Dried oregano','Mixed herbs','Chilli flakes','Chilli powder','Turmeric','Cinnamon','Curry powder','Garam masala','Soy sauce','Fish sauce','Oyster sauce','Hoisin sauce','Worcestershire sauce','Sesame oil','Sriracha','Ketchup','Tomato sauce','BBQ sauce','Mustard','Mayonnaise','Sweet chilli sauce','Hot sauce','Tomato paste','Chicken stock','Beef stock','Vegetable stock','Plain flour','Self-raising flour','Cornflour','Breadcrumbs','Panko breadcrumbs','Sugar','Brown sugar','Honey','Maple syrup','Rice','Pasta','Spaghetti','Egg noodles','Rice noodles','Canned tomatoes','Canned chickpeas','Canned lentils','Canned corn','Coconut milk','Peanut butter','Nutella','Jam','Vegemite','Butter','Eggs','Milk','Cream','Cheese','Parmesan','Onions','Garlic','Ginger','Potatoes','Sesame seeds','Olive oil spray','Baking powder','Bicarb soda','Vanilla extract','Oats','Cereal','Weet-Bix','Rice crackers','Vinegar','Apple cider vinegar','Red wine vinegar','Lemon juice','Soy milk','Almond milk','Peanuts','Almonds','Walnuts','Dried pasta','Lasagne sheets','Couscous','Quinoa','Tinned tuna','Tinned salmon','Baked beans','Peas','Corn kernels','Frozen spinach','Tomato passata','Dijon mustard','Wholegrain mustard','Tabasco','Mirin','Rice wine vinegar','Tahini','Olive tapenade','Sun-dried tomatoes','Capers','Anchovies','Stock cubes','Gravy powder','Cornstarch','Icing sugar','Cocoa powder','Chocolate chips','Dried fruit','Sultanas'];
 var CAT_MAP={'Beef mince':'Meat','Chicken breast':'Meat','Whole chicken':'Meat','Whole chickens':'Meat','Lamb shoulder':'Meat','Pork shoulder':'Meat','Carrot':'Produce','Celery':'Produce','Onion':'Produce','Garlic':'Produce','Fresh basil':'Produce','Potatoes':'Produce','Broccoli':'Produce','Avocados':'Produce','Lime':'Produce','Spring onions':'Produce','Fresh ginger':'Produce','Cucumber':'Produce','Fresh coriander':'Produce','Lemon':'Produce','Cabbage':'Produce','Fresh thyme':'Produce','Fresh parsley':'Produce','Rocket':'Produce','Zucchini':'Produce','Carrots':'Produce','Cherry tomatoes':'Produce','Slaw mix':'Produce','Parmesan':'Dairy','Ricotta':'Dairy','Greek yoghurt':'Dairy','Cheddar cheese':'Dairy','Mozzarella':'Dairy','Cream':'Dairy','Butter chicken sauce':'Pantry','Pesto':'Pantry','Pizza sauce':'Pantry','BBQ sauce':'Pantry','Crushed tomatoes':'Pantry','Mild salsa':'Pantry','Chipotle sauce':'Pantry','Sun-dried tomatoes':'Pantry','Garam masala':'Pantry','Pappardelle pasta':'Pantry','Penne pasta':'Pantry','Pasta':'Pantry','Egg noodles':'Pantry','Steamed rice':'Pantry','Sourdough bread':'Bakery','Soft bread rolls':'Bakery','Flatbreads':'Bakery','Soft taco shells':'Bakery','Soft wraps':'Bakery','Naan bread':'Bakery','Crusty bread':'Bakery','Frozen peas':'Frozen','Red wine':'Other','White wine':'Other','Chilli oil':'Other','Olives':'Other','Pickled jalapeños':'Other','Prosciutto':'Other','Sliced ham':'Other','Hot sauce':'Other','Sriracha':'Other','Mayonnaise':'Other'};
 var WEEK_DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday']; // overridden by profile
 var NUM_WEEKS=4;
@@ -1417,27 +1417,36 @@ document.getElementById('scan-go-btn').addEventListener('click',function(){
     msgContent.push({type:'text',text:'Photo '+(i+1)+' of '+scanPhotos.length});
   });
 
-  var prompt='These are photos of a fridge, freezer and pantry shelves. Identify every food item, ingredient, condiment, sauce, oil, spice, or pantry staple visible across ALL photos. Match what you see to items in this list using common sense — if you see olive oil match "Olive oil", if you see eggs match "Eggs". Be generous with matches. Match list: '+JSON.stringify(allStaples)+'. Return ONLY a valid JSON array of matching item names exactly as written in the list. No explanation, no markdown. Example: ["Olive oil","Eggs","Butter","Garlic"]';
+  // Build two-part prompt: first identify freely, then cross-match
+  var prompt='Look at these photos of a fridge and pantry. Do two things: 1. List every food item, ingredient, sauce, condiment, spice, oil or pantry staple you can see across all photos. Be thorough and generous. 2. Cross-reference your list with these pantry staples and return any matches: '+JSON.stringify(allStaples)+'. For matches use common sense — Fairy spread matches Butter, a soy sauce bottle matches Soy sauce, eggs in a carton matches Eggs, a milk bottle matches Milk etc. Return ONLY a valid JSON object: {"identified": ["everything you can see"], "matched": ["items that match the pantry list"]}. No explanation, no markdown.';
   msgContent.push({type:'text',text:prompt});
 
   fetch('/.netlify/functions/anthropic-proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:msgContent}]})})
   .then(function(r){return r.json();})
   .then(function(data){
-    var raw=(data.content&&data.content[0]&&data.content[0].text)||'[]';
+    var raw=(data.content&&data.content[0]&&data.content[0].text)||'{}';
     raw=raw.replace(/```json|```/g,'').trim();
-    var found=[];
-    try{found=JSON.parse(raw);}catch(e){
-      var m=raw.match(/\[[\s\S]*\]/);
-      if(m)try{found=JSON.parse(m[0]);}catch(e2){found=[];}
+    var identified=[],matched=[];
+    try{
+      var parsed=JSON.parse(raw);
+      identified=parsed.identified||[];
+      matched=parsed.matched||[];
+    }catch(e){
+      try{matched=JSON.parse(raw);}catch(e2){matched=[];}
     }
-    found=[...new Set(found)];
-    scanFoundItems=found.slice();
-    if(!found.length){
-      document.getElementById('scan-status').textContent='Could not clearly identify any pantry items \u2014 try better lighting or move closer to the shelves.';
+    matched=[...new Set(matched)];
+    var extras=identified.filter(function(item){
+      var norm=item.toLowerCase();
+      return !allStaples.some(function(s){return s.toLowerCase()===norm||norm.includes(s.toLowerCase());});
+    }).slice(0,10);
+    scanFoundItems=matched.slice();
+    var list=document.getElementById('scan-found-list');list.innerHTML='';
+    if(!matched.length&&!extras.length){
+      document.getElementById('scan-status').textContent='Could not match any pantry items. Try taking photos closer to the shelves with better lighting.';
     } else {
-      document.getElementById('scan-status').textContent='Found '+found.length+' item'+(found.length===1?'':'s')+' across your photos:';
-      var list=document.getElementById('scan-found-list');list.innerHTML='';
-      found.forEach(function(item){
+      var totalShown=matched.length+extras.length;
+      document.getElementById('scan-status').textContent='Found '+totalShown+' item'+(totalShown===1?'':'s')+' — tap any to remove:';
+      matched.forEach(function(item){
         var chip=document.createElement('span');
         chip.className='scan-found-chip';chip.textContent=item;chip.title='Tap to remove';chip.style.cursor='pointer';
         chip.addEventListener('click',function(){
@@ -1450,10 +1459,36 @@ document.getElementById('scan-go-btn').addEventListener('click',function(){
         });
         list.appendChild(chip);
       });
+      if(extras.length){
+        var extraLabel=document.createElement('div');
+        extraLabel.style.cssText='font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--amber);margin:10px 0 6px;width:100%';
+        extraLabel.textContent='Also spotted — tap to add as custom staples';
+        list.appendChild(extraLabel);
+        extras.forEach(function(item){
+          var chip=document.createElement('span');
+          chip.className='scan-found-chip';
+          chip.style.cssText='background:var(--amber-bg);color:var(--amber);border-color:var(--amber-border)';
+          chip.textContent=item;chip.title='Tap to add';chip.style.cursor='pointer';
+          var added=false;
+          chip.addEventListener('click',function(){
+            added=!added;
+            if(added){
+              scanFoundItems.push(item);
+              if(!(S.customStaples||[]).includes(item))S.customStaples.push(item);
+              chip.style.opacity='0.4';chip.style.textDecoration='line-through';
+            } else {
+              scanFoundItems=scanFoundItems.filter(function(i){return i!==item;});
+              chip.style.opacity='1';chip.style.textDecoration='none';
+            }
+          });
+          list.appendChild(chip);
+        });
+      }
       document.getElementById('scan-results').style.display='block';
-      document.getElementById('scan-results-title').textContent='Found '+found.length+' items — tap any to remove';
+      document.getElementById('scan-results-title').textContent='Matched to your pantry list — tap any to remove';
     }
     btn.disabled=false;btn.textContent='Scan all photos';
+
   })
   .catch(function(err){
     console.error(err);
