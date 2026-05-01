@@ -1417,18 +1417,7 @@ document.getElementById('scan-go-btn').addEventListener('click',function(){
     msgContent.push({type:'text',text:'Photo '+(i+1)+' of '+scanPhotos.length});
   });
 
-  var prompt='These are photos of someone's fridge, freezer and pantry shelves.
-
-Your job: identify every food item, ingredient, condiment, sauce, oil, spice, or pantry staple visible across ALL photos.
-
-Then match what you see to items in this list using common sense. For example if you see a bottle of olive oil match it to "Olive oil". If you see eggs match to "Eggs". Be generous — if you can reasonably identify something, include it.
-
-Match list:
-'+JSON.stringify(allStaples)+'
-
-Return ONLY a valid JSON array of matching item names exactly as written in the list. No explanation, no markdown.
-
-Example: ["Olive oil", "Eggs", "Butter", "Garlic"]';
+  var prompt='These are photos of a fridge, freezer and pantry shelves. Identify every food item, ingredient, condiment, sauce, oil, spice, or pantry staple visible across ALL photos. Match what you see to items in this list using common sense — if you see olive oil match "Olive oil", if you see eggs match "Eggs". Be generous with matches. Match list: '+JSON.stringify(allStaples)+'. Return ONLY a valid JSON array of matching item names exactly as written in the list. No explanation, no markdown. Example: ["Olive oil","Eggs","Butter","Garlic"]';
   msgContent.push({type:'text',text:prompt});
 
   fetch('/.netlify/functions/anthropic-proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:msgContent}]})})
