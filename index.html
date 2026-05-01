@@ -245,18 +245,20 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .scan-title{font-family:var(--font-display);font-size:19px;font-weight:400;color:var(--text)}
 .scan-close-btn{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .scan-body{padding:20px}
-.scan-drop{width:100%;min-height:150px;border:1.5px dashed var(--border2);border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;background:var(--bg3);position:relative;overflow:hidden;margin-bottom:14px}
-.scan-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.scan-drop-icon{font-size:30px;opacity:0.5}
-.scan-drop-text{font-size:13px;color:var(--text3);text-align:center}
-.scan-preview{width:100%;border-radius:var(--radius-sm);object-fit:cover;max-height:180px;display:none;margin-bottom:14px}
-.scan-go-btn{width:100%;background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:500;padding:13px;cursor:pointer;display:none;margin-bottom:10px}
-.scan-status{font-size:13px;color:var(--text2);text-align:center;line-height:1.6;min-height:20px}
-.scan-results{margin-top:14px;display:none}
+.scan-photos-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
+.scan-thumb{position:relative;border-radius:var(--radius-sm);overflow:hidden;aspect-ratio:4/3;background:var(--bg3)}
+.scan-thumb img{width:100%;height:100%;object-fit:cover}
+.scan-thumb-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,0.6);border:none;color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.scan-add-photo-btn{width:100%;background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-body);font-size:13px;font-weight:500;padding:12px;cursor:pointer;margin-bottom:10px;position:relative;overflow:hidden}
+.scan-add-photo-btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.scan-go-btn{width:100%;background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:500;padding:13px;cursor:pointer;margin-bottom:10px}
+.scan-status{font-size:13px;color:var(--text2);text-align:center;line-height:1.6;min-height:20px;margin-bottom:8px}
 .scan-results-title{font-size:11px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
-.scan-found-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.scan-found-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
 .scan-found-chip{font-size:12px;padding:4px 10px;border-radius:20px;background:var(--green-bg);color:var(--green);border:0.5px solid var(--green-border)}
-.scan-apply-btn{width:100%;background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:500;padding:13px;cursor:pointer}
+.scan-found-chip.removed{background:var(--bg3);color:var(--text3);border-color:var(--border);text-decoration:line-through}
+.scan-apply-btn{background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;font-weight:500;padding:11px;cursor:pointer}
+.scan-add-more-btn{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:13px;color:var(--text2);padding:11px 14px;cursor:pointer}
 
 /* Notes */
 .notes-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
@@ -342,18 +344,21 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
   <div class="scan-box">
     <div class="scan-head"><span class="scan-title">Scan your pantry</span><div class="scan-close-btn" id="scan-close">×</div></div>
     <div class="scan-body">
-      <div class="scan-drop" id="scan-drop">
-        <input type="file" id="scan-file-input" accept="image/*" capture="environment">
-        <span class="scan-drop-icon">📷</span>
-        <span class="scan-drop-text">Tap to take a photo or<br>choose from your camera roll</span>
-      </div>
-      <img class="scan-preview" id="scan-preview" alt="Preview">
-      <button class="scan-go-btn" id="scan-go-btn">Analyse photo</button>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5">Add up to 4 photos — fridge, pantry shelves, spice rack. More photos = better results.</p>
+      <div class="scan-photos-grid" id="scan-photos-grid"></div>
+      <button class="scan-add-photo-btn" id="scan-add-photo-btn">
+        <input type="file" id="scan-file-input" accept="image/*" multiple>
+        + Add photos
+      </button>
+      <button class="scan-go-btn" id="scan-go-btn" style="display:none">Scan all photos</button>
       <div class="scan-status" id="scan-status"></div>
-      <div class="scan-results" id="scan-results">
-        <div class="scan-results-title">Recognised in your photo</div>
+      <div class="scan-results" id="scan-results" style="display:none">
+        <div class="scan-results-title" id="scan-results-title">Found in your photos</div>
         <div class="scan-found-list" id="scan-found-list"></div>
-        <button class="scan-apply-btn" id="scan-apply-btn">Tick these as 'in stock'</button>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="scan-apply-btn" id="scan-apply-btn" style="flex:1">Tick all as in stock</button>
+          <button class="scan-add-more-btn" id="scan-add-more-btn">Add more photos</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1341,62 +1346,155 @@ function addCustomStaple(){
 }
 
 // ── Scan ──
-var scanImageBase64=null,scanFoundItems=[];
+// ── Pantry scan (multi-photo) ──
+var scanPhotos=[];
+var scanFoundItems=[];
+
 document.getElementById('btn-scan-pantry').addEventListener('click',function(){
   document.getElementById('scan-overlay-el').classList.remove('hidden');
-  document.body.style.overflow='hidden';resetScan();
+  document.body.style.overflow='hidden';
+  resetScan();
 });
 document.getElementById('scan-close').addEventListener('click',closeScan);
-document.getElementById('scan-file-input').addEventListener('change',function(e){
-  var file=e.target.files[0];if(!file)return;
-  var reader=new FileReader();
-  reader.onload=function(ev){
-    scanImageBase64=ev.target.result.split(',')[1];
-    var preview=document.getElementById('scan-preview');
-    preview.src=ev.target.result;preview.style.display='block';
-    document.getElementById('scan-drop').style.display='none';
-    document.getElementById('scan-go-btn').style.display='block';
-    document.getElementById('scan-status').textContent='Photo ready — tap Analyse to identify what you have.';
-  };reader.readAsDataURL(file);
-});
+
+function setupScanFileInput(){
+  var inp=document.getElementById('scan-file-input');
+  if(!inp)return;
+  inp.addEventListener('change',function(e){
+    var files=Array.from(e.target.files);
+    var remaining=4-scanPhotos.length;
+    files.slice(0,remaining).forEach(function(file){
+      var reader=new FileReader();
+      reader.onload=function(ev){
+        scanPhotos.push({base64:ev.target.result.split(',')[1],dataUrl:ev.target.result});
+        renderScanThumbs();
+      };
+      reader.readAsDataURL(file);
+    });
+    inp.value='';
+  });
+}
+
+function renderScanThumbs(){
+  var grid=document.getElementById('scan-photos-grid');
+  var addBtn=document.getElementById('scan-add-photo-btn');
+  var goBtn=document.getElementById('scan-go-btn');
+  if(!grid)return;
+  grid.innerHTML='';
+  scanPhotos.forEach(function(photo,i){
+    var thumb=document.createElement('div');
+    thumb.className='scan-thumb';
+    thumb.innerHTML='<img src="'+photo.dataUrl+'"><button class="scan-thumb-remove" data-i="'+i+'">×</button>';
+    thumb.querySelector('.scan-thumb-remove').addEventListener('click',function(){
+      scanPhotos.splice(parseInt(this.dataset.i),1);
+      renderScanThumbs();
+    });
+    grid.appendChild(thumb);
+  });
+  if(addBtn)addBtn.style.display=scanPhotos.length>=4?'none':'block';
+  if(goBtn)goBtn.style.display=scanPhotos.length>0?'block':'none';
+  var status=document.getElementById('scan-status');
+  if(status){
+    if(scanPhotos.length>0){
+      status.textContent=scanPhotos.length+' photo'+(scanPhotos.length===1?'':'s')+' ready — tap Scan to identify what you have.';
+    } else {
+      status.textContent='';
+    }
+  }
+}
+
 document.getElementById('scan-go-btn').addEventListener('click',function(){
-  if(!scanImageBase64)return;
-  var btn=document.getElementById('scan-go-btn');btn.disabled=true;btn.textContent='Analysing…';
-  document.getElementById('scan-status').innerHTML='<span class="spinner"></span> Looking at your photo…';
+  if(!scanPhotos.length)return;
+  var btn=document.getElementById('scan-go-btn');
+  btn.disabled=true;btn.textContent='Scanning…';
+  document.getElementById('scan-status').innerHTML='<span class="spinner"></span> Analysing '+scanPhotos.length+' photo'+(scanPhotos.length===1?'':'s')+'…';
   document.getElementById('scan-results').style.display='none';
+
   var allStaples=DEFAULT_PANTRY.concat((S.customStaples||[]));
-  var prompt='You are looking at a photo of someone\'s fridge or pantry shelves. Identify which items from this specific list are visible in the photo. Only include items you can clearly see — do not guess. Return ONLY a valid JSON array of matching item names exactly as they appear in the list. No explanation, no markdown.\n\nList: '+JSON.stringify(allStaples)+'\n\nReturn format: ["Item 1", "Item 2"]';
-  fetch('/.netlify/functions/anthropic-proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:scanImageBase64}},{type:'text',text:prompt}]}]})})
+  var msgContent=[];
+  scanPhotos.forEach(function(photo,i){
+    msgContent.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:photo.base64}});
+    msgContent.push({type:'text',text:'Photo '+(i+1)+' of '+scanPhotos.length});
+  });
+
+  var prompt='These are photos of someone's fridge, freezer and pantry shelves.
+
+Your job: identify every food item, ingredient, condiment, sauce, oil, spice, or pantry staple visible across ALL photos.
+
+Then match what you see to items in this list using common sense. For example if you see a bottle of olive oil match it to "Olive oil". If you see eggs match to "Eggs". Be generous — if you can reasonably identify something, include it.
+
+Match list:
+'+JSON.stringify(allStaples)+'
+
+Return ONLY a valid JSON array of matching item names exactly as written in the list. No explanation, no markdown.
+
+Example: ["Olive oil", "Eggs", "Butter", "Garlic"]';
+  msgContent.push({type:'text',text:prompt});
+
+  fetch('/.netlify/functions/anthropic-proxy',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:msgContent}]})})
   .then(function(r){return r.json();})
   .then(function(data){
     var raw=(data.content&&data.content[0]&&data.content[0].text)||'[]';
     raw=raw.replace(/```json|```/g,'').trim();
-    var found=[];try{found=JSON.parse(raw);}catch(e){found=[];}
-    scanFoundItems=found;
-    if(!found.length){document.getElementById('scan-status').textContent='Couldn\'t identify any staples clearly — try better lighting or a closer shot.';}
-    else{
-      document.getElementById('scan-status').textContent='Found '+found.length+' item'+(found.length===1?'':'s')+' in your photo:';
-      var list=document.getElementById('scan-found-list');list.innerHTML='';
-      found.forEach(function(item){var chip=document.createElement('span');chip.className='scan-found-chip';chip.textContent=item;list.appendChild(chip);});
-      document.getElementById('scan-results').style.display='block';
+    var found=[];
+    try{found=JSON.parse(raw);}catch(e){
+      var m=raw.match(/\[[\s\S]*\]/);
+      if(m)try{found=JSON.parse(m[0]);}catch(e2){found=[];}
     }
-    btn.disabled=false;btn.textContent='Analyse photo';
-  }).catch(function(err){console.error(err);document.getElementById('scan-status').textContent='Something went wrong — please try again.';btn.disabled=false;btn.textContent='Analyse photo';});
+    found=[...new Set(found)];
+    scanFoundItems=found.slice();
+    if(!found.length){
+      document.getElementById('scan-status').textContent='Couldn't clearly identify any pantry items — try better lighting or move closer to the shelves.';
+    } else {
+      document.getElementById('scan-status').textContent='Found '+found.length+' item'+(found.length===1?'':'s')+' across your photos:';
+      var list=document.getElementById('scan-found-list');list.innerHTML='';
+      found.forEach(function(item){
+        var chip=document.createElement('span');
+        chip.className='scan-found-chip';chip.textContent=item;chip.title='Tap to remove';chip.style.cursor='pointer';
+        chip.addEventListener('click',function(){
+          chip.classList.toggle('removed');
+          if(chip.classList.contains('removed')){
+            scanFoundItems=scanFoundItems.filter(function(i){return i!==item;});
+          } else {
+            if(!scanFoundItems.includes(item))scanFoundItems.push(item);
+          }
+        });
+        list.appendChild(chip);
+      });
+      document.getElementById('scan-results').style.display='block';
+      document.getElementById('scan-results-title').textContent='Found '+found.length+' items — tap any to remove';
+    }
+    btn.disabled=false;btn.textContent='Scan all photos';
+  })
+  .catch(function(err){
+    console.error(err);
+    document.getElementById('scan-status').textContent='Something went wrong — please try again.';
+    btn.disabled=false;btn.textContent='Scan all photos';
+  });
 });
+
 document.getElementById('scan-apply-btn').addEventListener('click',function(){
   scanFoundItems.forEach(function(item){if(!(S.pantryStaples||[]).includes(item))S.pantryStaples.push(item);});
   saveToFirebase();renderPantry();closeScan();
 });
+
+document.getElementById('scan-add-more-btn').addEventListener('click',function(){
+  document.getElementById('scan-file-input').click();
+});
+
 function resetScan(){
-  scanImageBase64=null;scanFoundItems=[];
-  document.getElementById('scan-drop').style.display='flex';
-  document.getElementById('scan-preview').style.display='none';
-  document.getElementById('scan-go-btn').style.display='none';
-  document.getElementById('scan-go-btn').disabled=false;document.getElementById('scan-go-btn').textContent='Analyse photo';
-  document.getElementById('scan-status').textContent='';document.getElementById('scan-results').style.display='none';
-  document.getElementById('scan-found-list').innerHTML='';document.getElementById('scan-file-input').value='';
+  scanPhotos=[];scanFoundItems=[];
+  var grid=document.getElementById('scan-photos-grid');if(grid)grid.innerHTML='';
+  var goBtn=document.getElementById('scan-go-btn');
+  if(goBtn){goBtn.style.display='none';goBtn.disabled=false;goBtn.textContent='Scan all photos';}
+  var addBtn=document.getElementById('scan-add-photo-btn');if(addBtn)addBtn.style.display='block';
+  var status=document.getElementById('scan-status');if(status)status.textContent='';
+  var results=document.getElementById('scan-results');if(results)results.style.display='none';
+  var list=document.getElementById('scan-found-list');if(list)list.innerHTML='';
+  var inp=document.getElementById('scan-file-input');if(inp)inp.value='';
 }
 function closeScan(){document.getElementById('scan-overlay-el').classList.add('hidden');document.body.style.overflow='';resetScan();}
+setupScanFileInput();
 
 // ── Notes ──
 function syncNotesToTextareas(){
