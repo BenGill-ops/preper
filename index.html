@@ -1433,7 +1433,7 @@ document.getElementById('scan-go-btn').addEventListener('click',function(){
     found=[...new Set(found)];
     scanFoundItems=found.slice();
     if(!found.length){
-      document.getElementById('scan-status').textContent='Couldn't clearly identify any pantry items — try better lighting or move closer to the shelves.';
+      document.getElementById('scan-status').textContent='Could not clearly identify any pantry items \u2014 try better lighting or move closer to the shelves.';
     } else {
       document.getElementById('scan-status').textContent='Found '+found.length+' item'+(found.length===1?'':'s')+' across your photos:';
       var list=document.getElementById('scan-found-list');list.innerHTML='';
