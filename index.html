@@ -285,6 +285,43 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .empty-icon{font-size:34px;margin-bottom:12px;display:block;opacity:0.4}
 .sm-btn{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-body);font-size:11px;font-weight:500;padding:6px 12px;cursor:pointer}
 @media(min-width:481px){body{background:#070710}.app-shell,.bottom-nav{border-left:0.5px solid var(--border);border-right:0.5px solid var(--border)}.app-shell{box-shadow:0 0 60px rgba(0,0,0,0.6)}}
+/* ── Choose your own meal overlay ── */
+.choose-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;display:flex;align-items:flex-end;justify-content:center}
+.choose-overlay.hidden{display:none}
+.choose-box{width:100%;max-width:480px;background:var(--bg2);border-radius:20px 20px 0 0;max-height:85vh;display:flex;flex-direction:column}
+.choose-head{padding:16px 20px 12px;border-bottom:0.5px solid var(--border);flex-shrink:0}
+.choose-title{font-family:var(--font-display);font-size:20px;font-weight:400;color:var(--text);margin-bottom:4px}
+.choose-sub{font-size:13px;color:var(--text3)}
+.choose-search{padding:12px 20px;border-bottom:0.5px solid var(--border);flex-shrink:0}
+.choose-search input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:14px;padding:10px 13px;outline:none}
+.choose-search input:focus{border-color:var(--green)}
+.choose-search input::placeholder{color:var(--text3)}
+.choose-list{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 20px calc(32px + var(--safe-bottom))}
+.choose-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border);cursor:pointer;gap:12px}
+.choose-item:last-child{border-bottom:none}
+.choose-item:active{opacity:0.7}
+.choose-item-left{flex:1;min-width:0}
+.choose-item-name{font-size:14px;color:var(--text);font-family:var(--font-display);font-weight:400;margin-bottom:2px}
+.choose-item-meta{font-size:11px;color:var(--text3)}
+.choose-item-custom{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--purple-bg);color:var(--purple);border:0.5px solid var(--purple-border);flex-shrink:0}
+.choose-btn{background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-xs);font-family:var(--font-body);font-size:11px;font-weight:500;padding:6px 12px;cursor:pointer;flex-shrink:0}
+
+/* ── Recipe card in recipes tab ── */
+.recipe-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden}
+.recipe-card.custom{border-color:var(--purple-border)}
+.recipe-card-head{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:0.5px solid var(--border)}
+.recipe-card-name{font-family:var(--font-display);font-size:15px;font-weight:400;color:var(--text);flex:1}
+.recipe-card-foot{padding:8px 14px;display:flex;align-items:center;justify-content:space-between;background:var(--bg3)}
+.recipe-card-tip{font-size:11px;color:var(--text3);font-style:italic;flex:1}
+.recipe-card-meta{font-size:11px;color:var(--text3)}
+.recipe-last-had{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--green-bg);color:var(--green);border:0.5px solid var(--green-border)}
+.recipe-overdue{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--amber-bg);color:var(--amber);border:0.5px solid var(--amber-border)}
+.recipe-never{font-size:11px;padding:2px 8px;border-radius:20px;background:var(--bg3);color:var(--text3);border:0.5px solid var(--border)}
+.recipe-section-lbl{font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin:18px 0 8px;padding-bottom:6px;border-bottom:0.5px solid var(--border)}
+.recipe-section-lbl:first-child{margin-top:0}
+.recipe-delete-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;line-height:1}
+.recipe-delete-btn:hover{color:#f87171}
+
 /* ── Portions overlay ── */
 .portions-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;display:flex;align-items:flex-end;justify-content:center}
 .portions-overlay.hidden{display:none}
@@ -550,6 +587,20 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
   </div>
 </div>
 
+<!-- Choose your own meal overlay -->
+<div class="choose-overlay hidden" id="choose-overlay">
+  <div class="choose-box">
+    <div class="choose-head">
+      <div class="choose-title">Choose a meal</div>
+      <div class="choose-sub" id="choose-sub">Replacing Thursday's dinner</div>
+    </div>
+    <div class="choose-search">
+      <input type="text" id="choose-search-input" placeholder="Search meals...">
+    </div>
+    <div class="choose-list" id="choose-list"></div>
+  </div>
+</div>
+
 <!-- Main app -->
 <div class="app-shell hidden" id="app-shell">
   <header class="app-header">
@@ -605,8 +656,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
       </div>
     </div>
     <div class="panel" id="panel-favourites">
-      <p class="section-sub">Your family's staple meals — all built into your weekly plan.</p>
+      <p class="section-sub">All your meals in one place — staples, custom recipes, and when you last had each one.</p>
       <button class="scan-btn" id="btn-add-recipe" style="margin-bottom:16px">+ Add your own recipe</button>
+      <div id="fav-search-wrap" style="margin-bottom:14px">
+        <input type="text" id="fav-search" placeholder="Search meals..." style="width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:14px;padding:11px 13px;outline:none">
+      </div>
       <div id="fav-list"></div>
     </div>
     <div class="panel" id="panel-history">
@@ -627,8 +681,11 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
     <button class="nav-item" data-tab="notes" id="nav-notes">
       <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="4" y="3" width="14" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 8h8M7 12h8M7 16h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Notes
     </button>
-    <button class="nav-item" data-tab="history" id="nav-history">
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 7v4l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>History
+    <button class="nav-item" data-tab="history" id="nav-history" style="display:none">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="11" r="7.5" stroke="currentColor" stroke-width="1.5"/></svg>History
+    </button>
+    <button class="nav-item" data-tab="favourites" id="nav-favourites">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M12 3H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M15 3l4 4-8 8H7v-4l8-8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Recipes
     </button>
   </nav>
 </div>
@@ -869,10 +926,10 @@ function renderObStep(){
     renderLeftoverPills();
   }
   else if(obStep===2){
-    body.innerHTML='<div class="ob-step-label">Step 3 of '+OB_STEPS+'</div><div class="ob-title">How do you like to <span>cook?</span></div><div class="ob-sub">This shapes how quick or involved each week\'s meals are.</div><div class="ob-section-label">How much time on weeknights?</div><div class="ob-pills" id="ob-time-pills"></div><div class="ob-section-label">What cuisines does your family enjoy?</div><div class="ob-pills" id="ob-cuisine-pills"></div><div class="ob-section-label">How adventurous are the kids with food?</div><div class="ob-pills" id="ob-kids-pills"></div>';
+    body.innerHTML='<div class="ob-step-label">Step 3 of '+OB_STEPS+'</div><div class="ob-title">How do you like to <span>cook?</span></div><div class="ob-sub">This shapes how quick or involved each week\'s meals are.</div><div class="ob-section-label">How much time on weeknights?</div><div class="ob-pills" id="ob-time-pills"></div><div class="ob-section-label">What cuisines does your family enjoy?</div><div class="ob-pills" id="ob-cuisine-pills"></div>'+(obData.kids>0?'<div class="ob-section-label">How adventurous are the kids with food?</div><div class="ob-pills" id="ob-kids-pills"></div>':'');
     renderPills('ob-time-pills',['Under 20 mins','20–40 mins','Up to an hour'],[obData.cookTime],false,function(v){obData.cookTime=v;});
     renderPills('ob-cuisine-pills',['Asian','Italian/pasta','Mexican','Aussie classics','Indian','Mediterranean','American/burgers','Middle Eastern'],obData.cuisines,true);
-    renderPills('ob-kids-pills',['Very picky — keep it plain','Moderate — some variety is fine','Pretty adventurous'],[obData.kidsAdventure],false,function(v){obData.kidsAdventure=v;});
+    if(obData.kids>0)renderPills('ob-kids-pills',['Very picky — keep it plain','Moderate — some variety is fine','Pretty adventurous'],[obData.kidsAdventure],false,function(v){obData.kidsAdventure=v;});
   }
   else if(obStep===3){
     var SUGGESTED_MEALS=['Spaghetti bolognese','Chicken stir-fry with noodles','Pesto chicken pasta','Tacos','Roast chicken','Slow-roasted lamb','Baked risotto','Sticky Asian beef bowl','Rissoles with mash & gravy','Baked meatballs with mash','Homemade pizza','Marry me chicken with broccoli','Butter chicken & rice','Beef nachos','Fish tacos','Sheet pan chicken & veggies','Pulled pork with slaw','Chicken fried rice','Sausages with mash & gravy','Salmon with miso glaze'];
@@ -1339,12 +1396,15 @@ function renderPlan(){
         '<span class="card-tip">'+meal.tip+'</span>'+
         (portionsLabel?'<span class="portions-badge">'+portionsLabel+'</span>':'')+
         (!done?'<button class="btn-card btn-portions-c">👥</button>':'')+
+        (!done?'<button class="btn-card btn-choose-c" title="Choose your own">Pick</button>':'')+
         (!done?'<button class="btn-card btn-swap-c">Swap</button>':'')+
         '<button class="btn-card'+(done?' done-active':'')+' btn-done-c">'+(done?'✓ Done':'Mark done')+'</button>'+
       '</div>';
     if(hasRecipe){var ct=card.querySelector('.card-top');ct.addEventListener('click',function(){openRecipe(w,i);});}
     var pb=card.querySelector('.btn-portions-c');
     if(pb)pb.addEventListener('click',function(e){e.stopPropagation();openPortions(w,i);});
+    var cb=card.querySelector('.btn-choose-c');
+    if(cb)cb.addEventListener('click',function(e){e.stopPropagation();openChooseMeal(w,i);});
     card.querySelector('.btn-done-c').addEventListener('click',function(e){e.stopPropagation();toggleDone(w,i);});
     var sb=card.querySelector('.btn-swap-c');
     if(sb)sb.addEventListener('click',function(e){e.stopPropagation();swapMeal(w,i);});
@@ -1442,6 +1502,39 @@ function formatQty(baseQty,baseUnit,count){
   return baseQty+' x'+count;
 }
 
+function getPortionMultiplier(item){
+  // Calculate a multiplier based on portions vs default
+  var portions=item.portions||{};
+  var defAdults=(S.profile&&S.profile.adults)||2;
+  var defKids=(S.profile&&S.profile.kids)||0;
+  var defTotal=defAdults+defKids;
+  var portAdults=portions.adults!=null?portions.adults:defAdults;
+  var portKids=portions.kids!=null?portions.kids:defKids;
+  var portTotal=portAdults+portKids;
+  if(defTotal<=0)return 1;
+  return portTotal/defTotal;
+}
+
+function scaleQty(baseQty,multiplier){
+  if(!baseQty||multiplier===1)return baseQty;
+  // Try to extract and scale a number from the qty string
+  var fractions={'¼':0.25,'½':0.5,'¾':0.75,'⅓':0.33,'⅔':0.67};
+  var num=null,prefix='',suffix=baseQty;
+  for(var f in fractions){
+    if(baseQty.trim().startsWith(f)){
+      num=fractions[f];prefix='';suffix=baseQty.trim().slice(f.length);break;
+    }
+  }
+  if(num===null){
+    var m=baseQty.match(/^(\d+\.?\d*)(.*)/);
+    if(m){num=parseFloat(m[1]);suffix=m[2];}
+  }
+  if(num===null)return baseQty+(multiplier!==1?' ×'+multiplier.toFixed(1).replace(/\.0$/,''):'');
+  var scaled=num*multiplier;
+  var formatted=scaled%1===0?scaled.toString():scaled.toFixed(1).replace(/\.0$/,'');
+  return formatted+suffix;
+}
+
 function getShoppingItems(){
   var byCat={Meat:[],Seafood:[],Produce:[],Dairy:[],Frozen:[],Bakery:[],Pantry:[],Other:[]};
   var seen=new Set();
@@ -1453,11 +1546,20 @@ function getShoppingItems(){
       byCat['Pantry'].push({name:s,qty:'',count:1,meal:'Pantry restock'});
     }
   });
-  // Collect ingredients — track count and qty separately per ingredient
-  var ingMap={}; // norm -> {name, baseQty, count, meals[], cat}
+  // Collect ingredients — track count, qty and portion multiplier per ingredient
+  var ingMap={}; // norm -> {name, baseQty, scaledQty, count, meals[], cat}
   var thisWeek=S.weeks[0]||[];
   thisWeek.forEach(function(item){
     if(item.leftoverOf)return;
+    var multiplier=getPortionMultiplier(item);
+    var mealLabel=item.meal.name;
+    // Add portion note to meal label if scaled
+    if(Math.abs(multiplier-1)>0.05){
+      var portAdults=(item.portions&&item.portions.adults!=null)?item.portions.adults:((S.profile&&S.profile.adults)||2);
+      var portKids=(item.portions&&item.portions.kids!=null)?item.portions.kids:((S.profile&&S.profile.kids)||0);
+      var hasKids=(S.profile&&S.profile.kids>0);
+      mealLabel+=' ('+portAdults+(hasKids&&portKids>0?'+'+portKids+' kids':'')+')';
+    }
     (item.meal.ingredients||[]).forEach(function(ingRaw){
       var ing=typeof ingRaw==='object'?ingRaw.n:ingRaw;
       var qty=typeof ingRaw==='object'?(ingRaw.q||''):'';
@@ -1465,17 +1567,17 @@ function getShoppingItems(){
       var isTicked=Array.from(tickedSet).some(function(s){return norm.includes(s)||s===norm;});
       if(!isTicked){
         if(!ingMap[norm]){
-          ingMap[norm]={name:ing,baseQty:qty,count:1,meals:[item.meal.name],cat:CAT_MAP[ing]||'Other'};
+          ingMap[norm]={name:ing,baseQty:qty,scaledQty:scaleQty(qty,multiplier),count:1,meals:[mealLabel],cat:CAT_MAP[ing]||'Other',multiplier:multiplier};
         } else {
           ingMap[norm].count++;
-          if(!ingMap[norm].meals.includes(item.meal.name))ingMap[norm].meals.push(item.meal.name);
+          if(!ingMap[norm].meals.includes(mealLabel))ingMap[norm].meals.push(mealLabel);
         }
       }
     });
   });
   // Build display qty and add to byCat
   Object.values(ingMap).forEach(function(it){
-    var displayQty=formatQty(it.baseQty,parseQtyUnit(it.baseQty),it.count);
+    var displayQty=formatQty(it.scaledQty||it.baseQty,parseQtyUnit(it.baseQty),it.count);
     byCat[it.cat].push({name:it.name,qty:displayQty,count:it.count,meal:it.meals.join(', ')});
   });
   return byCat;
@@ -1755,23 +1857,67 @@ function setupNoteListener(taId,savedId,key){
 }
 
 // ── Favourites ──
-function renderFavourites(){
+function getLastHad(mealName){
+  var hist=S.mealHistory||[];
+  var entry=hist.find(function(h){return h.name===mealName;});
+  return entry?entry.weeksAgo:null;
+}
+function lastHadLabel(mealName){
+  var w=getLastHad(mealName);
+  if(w===null)return null;
+  if(w===0)return 'This week';
+  if(w===1)return '1 week ago';
+  return w+' weeks ago';
+}
+function renderFavourites(filterText){
   var c=document.getElementById('fav-list');c.innerHTML='';
+  filterText=(filterText||'').toLowerCase().trim();
   var allMeals=[];
-  Object.keys(MEALS).forEach(function(day){MEALS[day].forEach(function(m){if(m.badge!=='leftovers')allMeals.push(m);});});
-  var seen=new Set();var unique=allMeals.filter(function(m){if(seen.has(m.name))return false;seen.add(m.name);return true;});
-  var cats={batch:[],quick:[],weekend:[]};
-  unique.forEach(function(m){if(cats[m.badge])cats[m.badge].push(m);});
-  [['batch','Batch cook / Sunday roasts'],['quick','Weeknight meals'],['weekend','Weekend specials']].forEach(function(pair){
-    var mls=cats[pair[0]];if(!mls||!mls.length)return;
-    var lbl=document.createElement('div');lbl.className='fav-cat-lbl';lbl.textContent=pair[1];c.appendChild(lbl);
-    mls.forEach(function(m){
-      var card=document.createElement('div');card.className='fav-card';
-      var b=m.badge==='batch'?'Batch cook':m.badge==='weekend'?'Weekend':'Quick';
-      card.innerHTML='<div class="fav-head"><span class="fav-name">'+m.name+'</span><span class="badge badge-'+m.badge+'">'+b+'</span><span class="fav-time">'+m.cookTime+'</span></div><div class="fav-tip">'+m.tip+'</div>';
-      c.appendChild(card);
+  var seen=new Set();
+  Object.keys(MEALS).forEach(function(day){
+    MEALS[day].forEach(function(m){
+      if(m.badge!=='leftovers'&&!seen.has(m.name)){seen.add(m.name);allMeals.push({meal:m,isCustom:false});}
     });
   });
+  (S.userMeals||[]).forEach(function(m){
+    if(!seen.has(m.name)){seen.add(m.name);allMeals.push({meal:m,isCustom:true});}
+  });
+  if(filterText){allMeals=allMeals.filter(function(item){return item.meal.name.toLowerCase().includes(filterText);});}
+  if(!allMeals.length){c.innerHTML='<div class="empty"><span class="empty-icon">\uD83C\uDF7D</span>No meals found.</div>';return;}
+  allMeals.sort(function(a,b){
+    var wa=getLastHad(a.meal.name);var wb=getLastHad(b.meal.name);
+    if(a.isCustom&&!b.isCustom)return -1;
+    if(!a.isCustom&&b.isCustom)return 1;
+    if(wa===null&&wb!==null)return -1;
+    if(wa!==null&&wb===null)return 1;
+    if(wa===null&&wb===null)return 0;
+    return wb-wa;
+  });
+  var customMeals=allMeals.filter(function(i){return i.isCustom;});
+  var defaultMeals=allMeals.filter(function(i){return !i.isCustom;});
+  function renderSection(items,title){
+    if(!items.length)return;
+    if(title&&!filterText){var lbl=document.createElement('div');lbl.className='recipe-section-lbl';lbl.textContent=title;c.appendChild(lbl);}
+    items.forEach(function(item){
+      var m=item.meal;
+      var card=document.createElement('div');
+      card.className='recipe-card'+(item.isCustom?' custom':'');
+      var b=m.badge==='batch'?'Batch cook':m.badge==='weekend'?'Weekend':'Quick';
+      var w=getLastHad(m.name);
+      var lastHad=lastHadLabel(m.name);
+      var lastHadHtml=lastHad===null?'<span class="recipe-never">Never tried</span>':
+        lastHad==='This week'?'<span class="recipe-last-had">This week</span>':
+        '<span class="'+(w>=3?'recipe-overdue':'recipe-last-had')+'">'+lastHad+'</span>';
+      var customBadge=item.isCustom?'<span class="choose-item-custom">Custom</span>':'';
+      var deleteBtn=item.isCustom?'<button class="recipe-delete-btn" data-name="'+m.name+'" title="Remove">\u{1F5D1}</button>':'';
+      card.innerHTML='<div class="recipe-card-head"><div class="recipe-card-name">'+m.name+'</div>'+customBadge+'<span class="badge badge-'+m.badge+'">'+b+'</span><span style="font-size:11px;color:var(--text3);margin-left:4px">'+m.cookTime+'</span>'+deleteBtn+'</div><div class="recipe-card-foot"><span class="recipe-card-tip">'+(m.tip||'')+'</span>'+lastHadHtml+'</div>';
+      var delBtn=card.querySelector('.recipe-delete-btn');
+      if(delBtn){delBtn.addEventListener('click',function(e){e.stopPropagation();var name=delBtn.dataset.name;if(confirm('Remove "'+name+'" from your recipes?')){S.userMeals=(S.userMeals||[]).filter(function(mr){return mr.name!==name;});mergeUserMeals(S.userMeals);saveToFirebase();renderFavourites(filterText);}});}
+      c.appendChild(card);
+    });
+  }
+  if(filterText){renderSection(allMeals,'');}
+  else{renderSection(customMeals,'Your custom recipes');renderSection(defaultMeals,'All staple meals');}
 }
 
 // ── History ──
@@ -1794,7 +1940,7 @@ function refreshTab(){
   else if(activeTab==='shopping')renderShoppingList();
   else if(activeTab==='pantry')renderPantry();
   else if(activeTab==='notes'){syncNotesToTextareas();applyKidsMode();}
-  else if(activeTab==='favourites')renderFavourites();
+  else if(activeTab==='favourites'){renderFavourites(document.getElementById('fav-search').value||'');}
   else if(activeTab==='history')renderHistory();
 }
 function switchTab(t){
@@ -2053,6 +2199,92 @@ function saveCustomRecipe(meal){
   renderFavourites();
   alert('"'+meal.name+'" added to your '+meal.day+' meal rotation!');
 }
+
+// ── Choose your own meal ──
+var chooseWeek=null,chooseDay=null;
+
+function getAllPickableMeals(){
+  var meals=[];
+  var seen=new Set();
+  // User meals first
+  (S.userMeals||[]).forEach(function(m){
+    if(!seen.has(m.name)){seen.add(m.name);meals.push({meal:m,isCustom:true});}
+  });
+  // Default staples
+  Object.keys(MEALS).forEach(function(day){
+    MEALS[day].forEach(function(m){
+      if(m.badge!=='leftovers'&&!seen.has(m.name)){seen.add(m.name);meals.push({meal:m,isCustom:false});}
+    });
+  });
+  return meals;
+}
+
+function openChooseMeal(w,i){
+  chooseWeek=w;chooseDay=i;
+  var item=S.weeks[w][i];
+  document.getElementById('choose-sub').textContent='Replacing '+item.day+'\'s dinner';
+  renderChooseList('');
+  document.getElementById('choose-overlay').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+  document.getElementById('choose-search-input').value='';
+  document.getElementById('choose-search-input').focus();
+}
+
+function closeChooseMeal(){
+  document.getElementById('choose-overlay').classList.add('hidden');
+  document.body.style.overflow='';
+}
+
+function renderChooseList(filter){
+  var c=document.getElementById('choose-list');c.innerHTML='';
+  var meals=getAllPickableMeals();
+  filter=(filter||'').toLowerCase().trim();
+  if(filter)meals=meals.filter(function(i){return i.meal.name.toLowerCase().includes(filter);});
+  if(!meals.length){
+    c.innerHTML='<div style="padding:20px 0;text-align:center;color:var(--text3);font-size:13px">No meals found</div>';
+    return;
+  }
+  meals.forEach(function(item){
+    var m=item.meal;
+    var row=document.createElement('div');row.className='choose-item';
+    var lastHad=lastHadLabel(m.name);
+    var lastHadTxt=lastHad?lastHad:'Never tried';
+    row.innerHTML=
+      '<div class="choose-item-left">'+
+        '<div class="choose-item-name">'+m.name+'</div>'+
+        '<div class="choose-item-meta">'+m.cookTime+' &nbsp;·&nbsp; '+lastHadTxt+'</div>'+
+      '</div>'+
+      (item.isCustom?'<span class="choose-item-custom">Custom</span>':'')+
+      '<button class="choose-btn">Pick</button>';
+    row.querySelector('.choose-btn').addEventListener('click',function(){
+      S.weeks[chooseWeek][chooseDay].meal=m;
+      S.weeks[chooseWeek][chooseDay].leftoverOf=null;
+      S.weeks[chooseWeek][chooseDay].portions={};
+      // If batch day, update the leftover day too
+      var profile=S.profile||{};
+      if(S.weeks[chooseWeek][chooseDay].day===profile.batchDay&&m.leftoversKey){
+        var leftoverDaysArr=profile.leftoverDays||[];
+        leftoverDaysArr.forEach(function(ld){
+          var ldIdx=WEEK_DAYS.indexOf(ld);
+          if(ldIdx>0&&S.weeks[chooseWeek][ldIdx]){
+            var leftoverMeal=MEALS.Monday.find(function(ml){return ml.leftoversFor===m.leftoversKey;});
+            if(leftoverMeal){S.weeks[chooseWeek][ldIdx].meal=leftoverMeal;S.weeks[chooseWeek][ldIdx].leftoverOf=m.name;}
+          }
+        });
+      }
+      saveToFirebase();renderPlan();closeChooseMeal();
+    });
+    c.appendChild(row);
+  });
+}
+
+document.getElementById('choose-overlay').addEventListener('click',function(e){if(e.target===this)closeChooseMeal();});
+document.getElementById('choose-search-input').addEventListener('input',function(){renderChooseList(this.value);});
+
+// Wire up recipe tab search
+document.getElementById('fav-search').addEventListener('input',function(){renderFavourites(this.value);});
+
+// Update refreshTab to include recipes tab
 </script>
 </body>
 </html>
