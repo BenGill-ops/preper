@@ -33,6 +33,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .email-btn{background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:500;padding:13px;cursor:pointer;width:100%}
 .email-btn:active{opacity:0.85}
 .auth-switch{font-size:13px;color:var(--text3);margin-top:16px;cursor:pointer}
+.auth-forgot{font-size:12px;color:var(--text3);text-align:right;cursor:pointer;text-decoration:underline;margin-top:-4px}
+.auth-forgot:hover{color:var(--text2)}
+.auth-success{font-size:13px;color:var(--green);margin-top:8px;min-height:18px}
 .auth-switch span{color:var(--green);text-decoration:underline}
 .auth-error{font-size:13px;color:#f87171;margin-top:8px;min-height:18px}
 
@@ -388,25 +391,48 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 /* ── PDF print ── */
 @media print{
   body{background:#fff!important;color:#000!important}
-  .app-header,.bottom-nav,.week-strip-wrap,.card-footer,.btn-card,.sm-btn,.header-btn,.account-menu,.backdrop,.rsheet,.scan-overlay,.portions-overlay,.recipe-add-overlay{display:none!important}
+  .app-header,.bottom-nav,.week-strip-wrap,.card-footer,.btn-card,.sm-btn,.header-btn,.account-menu,.backdrop,.rsheet,.scan-overlay,.portions-overlay,.recipe-add-overlay,.print-menu,.choose-overlay,.fav-search-wrap,.sl-week-selector,.advance-banner{display:none!important}
   .app-shell{max-width:100%!important;box-shadow:none!important}
-  .meal-card{border:1px solid #ddd!important;background:#fff!important;page-break-inside:avoid;margin-bottom:16px}
-  .card-top,.card-versions,.ver,.meal-name,.day-pill,.ver-label,.ver-desc,.card-time{color:#000!important;background:#fff!important}
-  .badge{border:1px solid #999!important;color:#333!important;background:#f5f5f5!important}
-  .card-versions{border-bottom:1px solid #ddd!important}
-  .ver+.ver{border-left:1px solid #ddd!important}
-  .print-header{display:block!important;text-align:center;margin-bottom:24px;font-size:22px;font-weight:600}
-  .leftover-banner{background:#e8f5e9!important;color:#2e7d32!important;border:1px solid #a5d6a7!important}
-  .panel{display:block!important}
-  #panel-shopping,#panel-pantry,#panel-notes,#panel-favourites,#panel-history{display:none!important}
-  #panel-meals{display:block!important}
   .main-content{padding:0!important;overflow:visible!important}
-  .week-header-bar{margin-bottom:4px}
-  .week-date-range{background:#f5f5f5!important;color:#333!important;border:1px solid #ddd!important;margin-bottom:12px}
-  .week-heading{color:#000!important;font-size:18px}
+  .panel{display:none!important}
+  /* Plan print mode */
+  body[data-print-mode="plan"] #panel-meals{display:block!important}
+  body[data-print-mode="plan"] .meal-card{border:1px solid #ddd!important;background:#fff!important;page-break-inside:avoid;margin-bottom:14px}
+  body[data-print-mode="plan"] .card-top{background:#fff!important}
+  body[data-print-mode="plan"] .card-versions{border-bottom:1px solid #ddd!important;background:#fff!important}
+  body[data-print-mode="plan"] .ver+.ver{border-left:1px solid #ddd!important}
+  body[data-print-mode="plan"] .meal-name,.day-pill,.ver-label,.ver-desc,.card-time{color:#000!important}
+  body[data-print-mode="plan"] .badge{border:1px solid #999!important;color:#333!important;background:#f5f5f5!important}
+  body[data-print-mode="plan"] .leftover-banner{background:#e8f5e9!important;color:#2e7d32!important;border:1px solid #a5d6a7!important}
+  body[data-print-mode="plan"] .week-header-bar{margin-bottom:4px}
+  body[data-print-mode="plan"] .week-date-range{display:block!important;background:#f5f5f5!important;color:#333!important;border:1px solid #ddd!important;margin-bottom:12px}
+  body[data-print-mode="plan"] .week-heading{color:#000!important;font-size:18px}
+  /* Shopping print mode */
+  body[data-print-mode="shopping"] #panel-shopping{display:block!important}
+  body[data-print-mode="shopping"] .sl-item{border-bottom:1px solid #eee!important;padding:8px 0!important}
+  body[data-print-mode="shopping"] .sl-chk{border:1px solid #999!important;background:#fff!important}
+  body[data-print-mode="shopping"] .sl-name{color:#000!important}
+  body[data-print-mode="shopping"] .sl-qty{background:#f5f5f5!important;color:#333!important;border:1px solid #ddd!important}
+  body[data-print-mode="shopping"] .sl-meal{color:#666!important}
+  body[data-print-mode="shopping"] .sl-cat{color:#333!important;border-bottom:1px solid #ddd!important}
+  body[data-print-mode="shopping"] .sl-stats,.sl-progress{display:none!important}
+  /* Recipes print mode */
+  body[data-print-mode="recipes"] #panel-favourites{display:block!important}
+  body[data-print-mode="recipes"] .recipe-card{border:1px solid #ddd!important;background:#fff!important;page-break-inside:avoid;margin-bottom:10px}
+  body[data-print-mode="recipes"] .recipe-card-name{color:#000!important}
+  body[data-print-mode="recipes"] .recipe-card-tip{color:#333!important}
+  body[data-print-mode="recipes"] .recipe-section-lbl{color:#333!important;border-bottom:1px solid #ddd!important}
+  body[data-print-mode="recipes"] .badge{border:1px solid #999!important;color:#333!important;background:#f5f5f5!important}
+  body[data-print-mode="recipes"] .recipe-delete-btn,.scan-btn{display:none!important}
+  /* Default fallback */
+  body:not([data-print-mode]) #panel-meals{display:block!important}
 }
 .print-header{display:none}
 .btn-print{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-body);font-size:11px;font-weight:500;padding:6px 10px;cursor:pointer}
+.print-menu{position:absolute;top:calc(var(--safe-top) + 56px);right:calc(50% - 230px);background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:6px;z-index:300;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.print-menu.hidden{display:none}
+.print-menu-item{font-size:13px;color:var(--text2);padding:10px 12px;border-radius:var(--radius-xs);cursor:pointer;display:flex;align-items:center;gap:8px}
+.print-menu-item:hover{background:var(--bg3)}
 
 </style>
 </head>
@@ -430,7 +456,9 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
   <div class="email-form" id="email-form">
     <input type="email" id="auth-email" placeholder="Email address" autocomplete="email">
     <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password">
+    <div class="auth-forgot" id="btn-forgot-password">Forgot password?</div>
     <div class="auth-error" id="auth-error"></div>
+    <div class="auth-success" id="auth-success"></div>
     <button class="email-btn" id="btn-email-signin">Sign in</button>
     <button class="email-btn" id="btn-email-signup" style="background:var(--bg3);color:var(--text2);border:0.5px solid var(--border2)">Create account</button>
   </div>
@@ -488,6 +516,13 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 </div>
 
 <!-- Account menu -->
+<!-- Print menu -->
+<div class="print-menu hidden" id="print-menu">
+  <div class="print-menu-item" id="print-plan">📅 This week's meal plan</div>
+  <div class="print-menu-item" id="print-shopping">🛒 Shopping list</div>
+  <div class="print-menu-item" id="print-recipes">📖 My recipes</div>
+</div>
+
 <div class="account-menu hidden" id="account-menu">
   <div class="acct-name" id="acct-name-display"></div>
   <div class="acct-item" id="acct-signout">
@@ -824,6 +859,20 @@ document.getElementById('btn-email-signup').addEventListener('click',function(){
   if(pass.length<6){document.getElementById('auth-error').textContent='Password must be at least 6 characters.';return;}
   auth.createUserWithEmailAndPassword(email,pass).catch(function(e){
     document.getElementById('auth-error').textContent=e.message;
+  });
+});
+
+// Forgot password
+document.getElementById('btn-forgot-password').addEventListener('click',function(){
+  var email=document.getElementById('auth-email').value.trim();
+  var errEl=document.getElementById('auth-error');
+  var successEl=document.getElementById('auth-success');
+  errEl.textContent='';successEl.textContent='';
+  if(!email){errEl.textContent='Please enter your email address first.';return;}
+  auth.sendPasswordResetEmail(email).then(function(){
+    successEl.textContent='Reset email sent! Check your inbox (and spam folder).';
+  }).catch(function(e){
+    errEl.textContent=e.message;
   });
 });
 
@@ -2093,12 +2142,29 @@ document.getElementById('portions-save-btn').addEventListener('click',function()
 });
 
 // ── PDF Print ──
-document.getElementById('btn-print').addEventListener('click',function(){
-  // Make sure meals panel is active for print
-  var wasTab=activeTab;
-  if(activeTab!=='meals'){switchTab('meals');}
-  setTimeout(function(){window.print();},200);
+document.getElementById('btn-print').addEventListener('click',function(e){
+  e.stopPropagation();
+  document.getElementById('print-menu').classList.toggle('hidden');
+  document.getElementById('account-menu').classList.add('hidden');
 });
+
+function doPrint(mode){
+  document.getElementById('print-menu').classList.add('hidden');
+  // Set print mode class on body
+  document.body.setAttribute('data-print-mode',mode);
+  // Navigate to correct tab
+  if(mode==='plan'){if(activeTab!=='meals')switchTab('meals');}
+  else if(mode==='shopping'){if(activeTab!=='shopping')switchTab('shopping');}
+  else if(mode==='recipes'){if(activeTab!=='favourites')switchTab('favourites');}
+  setTimeout(function(){window.print();document.body.removeAttribute('data-print-mode');},300);
+}
+
+document.getElementById('print-plan').addEventListener('click',function(){doPrint('plan');});
+document.getElementById('print-shopping').addEventListener('click',function(){doPrint('shopping');});
+document.getElementById('print-recipes').addEventListener('click',function(){doPrint('recipes');});
+
+// Close print menu on outside click
+document.addEventListener('click',function(){document.getElementById('print-menu').classList.add('hidden');});
 
 // ── Add Recipe ──
 var generatedRecipePhoto=null,generatedRecipeUrl=null;
