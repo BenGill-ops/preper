@@ -285,6 +285,76 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .empty-icon{font-size:34px;margin-bottom:12px;display:block;opacity:0.4}
 .sm-btn{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-body);font-size:11px;font-weight:500;padding:6px 12px;cursor:pointer}
 @media(min-width:481px){body{background:#070710}.app-shell,.bottom-nav{border-left:0.5px solid var(--border);border-right:0.5px solid var(--border)}.app-shell{box-shadow:0 0 60px rgba(0,0,0,0.6)}}
+/* ── Portions overlay ── */
+.portions-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;display:flex;align-items:flex-end;justify-content:center}
+.portions-overlay.hidden{display:none}
+.portions-box{width:100%;max-width:480px;background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 24px calc(32px + var(--safe-bottom))}
+.portions-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 20px}
+.portions-title{font-family:var(--font-display);font-size:20px;font-weight:400;color:var(--text);margin-bottom:6px}
+.portions-sub{font-size:13px;color:var(--text3);margin-bottom:20px}
+.portions-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid var(--border)}
+.portions-row:last-of-type{border-bottom:none;margin-bottom:16px}
+.portions-label{font-size:14px;color:var(--text2)}
+.portions-ctrl{display:flex;align-items:center;gap:14px}
+.portions-btn{width:32px;height:32px;border-radius:50%;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;line-height:1}
+.portions-val{font-size:16px;font-weight:500;color:var(--text);min-width:20px;text-align:center}
+.portions-save-btn{width:100%;background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:500;padding:13px;cursor:pointer}
+.portions-badge{font-size:10px;padding:2px 7px;border-radius:20px;background:var(--purple-bg);color:var(--purple);border:0.5px solid var(--purple-border);white-space:nowrap}
+
+/* ── Add recipe overlay ── */
+.recipe-add-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:600;display:flex;align-items:flex-end;justify-content:center}
+.recipe-add-overlay.hidden{display:none}
+.recipe-add-box{width:100%;max-width:480px;background:var(--bg2);border-radius:20px 20px 0 0;max-height:90vh;display:flex;flex-direction:column}
+.recipe-add-head{padding:16px 20px 12px;border-bottom:0.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.recipe-add-title{font-family:var(--font-display);font-size:20px;font-weight:400;color:var(--text)}
+.recipe-add-close{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border2);color:var(--text2);font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.recipe-add-body{overflow-y:auto;padding:20px;-webkit-overflow-scrolling:touch;padding-bottom:calc(32px + var(--safe-bottom))}
+.method-tabs{display:flex;gap:0;border:0.5px solid var(--border2);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:20px}
+.method-tab{flex:1;font-size:12px;font-weight:500;padding:9px 6px;background:transparent;border:none;color:var(--text3);cursor:pointer;text-align:center;font-family:var(--font-body)}
+.method-tab.active{background:var(--bg3);color:var(--text)}
+.method-panel{display:none}.method-panel.active{display:block}
+.recipe-field-label{font-size:11px;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;margin-top:14px}
+.recipe-field-label:first-child{margin-top:0}
+.recipe-input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:14px;padding:11px 13px;outline:none;margin-bottom:2px}
+.recipe-input:focus{border-color:var(--green)}
+.recipe-input::placeholder{color:var(--text3)}
+.recipe-textarea{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:14px;padding:11px 13px;outline:none;resize:none;line-height:1.6}
+.recipe-textarea:focus{border-color:var(--green)}
+.recipe-textarea::placeholder{color:var(--text3)}
+.recipe-day-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.recipe-save-btn{width:100%;background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:500;padding:13px;cursor:pointer;margin-top:20px}
+.recipe-scanning{text-align:center;padding:20px 0;color:var(--text3);font-size:13px}
+.recipe-photo-drop{width:100%;min-height:120px;border:1.5px dashed var(--border2);border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;background:var(--bg3);position:relative;overflow:hidden;margin-bottom:12px}
+.recipe-photo-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.recipe-photo-preview{width:100%;border-radius:var(--radius-sm);max-height:160px;object-fit:cover;display:none;margin-bottom:12px}
+.recipe-generate-btn{width:100%;background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:14px;font-weight:500;padding:13px;cursor:pointer;display:none;margin-bottom:10px}
+.recipe-status{font-size:13px;color:var(--text2);text-align:center;min-height:18px;margin-bottom:8px}
+.recipe-generated-preview{background:var(--bg3);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px;display:none}
+.recipe-generated-name{font-family:var(--font-display);font-size:16px;color:var(--text);margin-bottom:4px}
+.recipe-generated-desc{font-size:12px;color:var(--text3);line-height:1.5}
+
+/* ── PDF print ── */
+@media print{
+  body{background:#fff!important;color:#000!important}
+  .app-header,.bottom-nav,.week-strip-wrap,.card-footer,.btn-card,.sm-btn,.header-btn,.account-menu,.backdrop,.rsheet,.scan-overlay,.portions-overlay,.recipe-add-overlay{display:none!important}
+  .app-shell{max-width:100%!important;box-shadow:none!important}
+  .meal-card{border:1px solid #ddd!important;background:#fff!important;page-break-inside:avoid;margin-bottom:16px}
+  .card-top,.card-versions,.ver,.meal-name,.day-pill,.ver-label,.ver-desc,.card-time{color:#000!important;background:#fff!important}
+  .badge{border:1px solid #999!important;color:#333!important;background:#f5f5f5!important}
+  .card-versions{border-bottom:1px solid #ddd!important}
+  .ver+.ver{border-left:1px solid #ddd!important}
+  .print-header{display:block!important;text-align:center;margin-bottom:24px;font-size:22px;font-weight:600}
+  .leftover-banner{background:#e8f5e9!important;color:#2e7d32!important;border:1px solid #a5d6a7!important}
+  .panel{display:block!important}
+  #panel-shopping,#panel-pantry,#panel-notes,#panel-favourites,#panel-history{display:none!important}
+  #panel-meals{display:block!important}
+  .main-content{padding:0!important;overflow:visible!important}
+  .week-header-bar{margin-bottom:12px}
+  .week-heading{color:#000!important;font-size:18px}
+}
+.print-header{display:none}
+.btn-print{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-body);font-size:11px;font-weight:500;padding:6px 10px;cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -377,6 +447,109 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
   </div>
 </div>
 
+<!-- Portions overlay -->
+<div class="portions-overlay hidden" id="portions-overlay">
+  <div class="portions-box">
+    <div class="portions-handle"></div>
+    <div class="portions-title">Adjust portions</div>
+    <div class="portions-sub" id="portions-meal-name"></div>
+    <div class="portions-row">
+      <span class="portions-label">Adults</span>
+      <div class="portions-ctrl">
+        <button class="portions-btn" id="portions-adults-minus">−</button>
+        <span class="portions-val" id="portions-adults-val">2</span>
+        <button class="portions-btn" id="portions-adults-plus">+</button>
+      </div>
+    </div>
+    <div class="portions-row" id="portions-kids-row">
+      <span class="portions-label">Kids</span>
+      <div class="portions-ctrl">
+        <button class="portions-btn" id="portions-kids-minus">−</button>
+        <span class="portions-val" id="portions-kids-val">2</span>
+        <button class="portions-btn" id="portions-kids-plus">+</button>
+      </div>
+    </div>
+    <button class="portions-save-btn" id="portions-save-btn">Save portions</button>
+  </div>
+</div>
+
+<!-- Add recipe overlay -->
+<div class="recipe-add-overlay hidden" id="recipe-add-overlay">
+  <div class="recipe-add-box">
+    <div class="recipe-add-head">
+      <span class="recipe-add-title">Add your own recipe</span>
+      <div class="recipe-add-close" id="recipe-add-close">×</div>
+    </div>
+    <div class="recipe-add-body">
+      <div class="method-tabs">
+        <button class="method-tab active" data-method="photo">📷 Photo</button>
+        <button class="method-tab" data-method="url">🔗 URL</button>
+        <button class="method-tab" data-method="manual">✏️ Manual</button>
+      </div>
+      <!-- Photo method -->
+      <div class="method-panel active" id="method-photo">
+        <p style="font-size:13px;color:var(--text3);margin-bottom:12px;line-height:1.5">Take a photo of a recipe from a book or magazine. Claude will read it and add it to your meal rotation.</p>
+        <div class="recipe-photo-drop" id="recipe-photo-drop">
+          <input type="file" id="recipe-photo-input" accept="image/*" capture="environment">
+          <span style="font-size:28px;opacity:0.5">📖</span>
+          <span style="font-size:13px;color:var(--text3)">Tap to photograph a recipe</span>
+        </div>
+        <img class="recipe-photo-preview" id="recipe-photo-preview" alt="">
+        <button class="recipe-generate-btn" id="recipe-generate-btn">Read recipe from photo</button>
+        <div class="recipe-status" id="recipe-photo-status"></div>
+        <div class="recipe-generated-preview" id="recipe-generated-preview">
+          <div class="recipe-generated-name" id="recipe-generated-name"></div>
+          <div class="recipe-generated-desc" id="recipe-generated-desc"></div>
+        </div>
+        <div id="recipe-photo-day-wrap" style="display:none">
+          <div class="recipe-field-label">Add to which day pool?</div>
+          <div class="recipe-day-pills" id="recipe-photo-day-pills"></div>
+          <button class="recipe-save-btn" id="recipe-photo-save-btn">Add to my meal rotation</button>
+        </div>
+      </div>
+      <!-- URL method -->
+      <div class="method-panel" id="method-url">
+        <p style="font-size:13px;color:var(--text3);margin-bottom:12px;line-height:1.5">Paste a link to a recipe from any website. Claude will extract the details and add it to your rotation.</p>
+        <div class="recipe-field-label">Recipe URL</div>
+        <input class="recipe-input" type="url" id="recipe-url-input" placeholder="https://www.example.com/recipe...">
+        <button class="recipe-generate-btn" id="recipe-url-fetch-btn" style="display:block;margin-top:10px">Extract recipe from URL</button>
+        <div class="recipe-status" id="recipe-url-status"></div>
+        <div class="recipe-generated-preview" id="recipe-url-preview">
+          <div class="recipe-generated-name" id="recipe-url-name"></div>
+          <div class="recipe-generated-desc" id="recipe-url-desc"></div>
+        </div>
+        <div id="recipe-url-day-wrap" style="display:none">
+          <div class="recipe-field-label">Add to which day pool?</div>
+          <div class="recipe-day-pills" id="recipe-url-day-pills"></div>
+          <button class="recipe-save-btn" id="recipe-url-save-btn">Add to my meal rotation</button>
+        </div>
+      </div>
+      <!-- Manual method -->
+      <div class="method-panel" id="method-manual">
+        <div class="recipe-field-label">Recipe name</div>
+        <input class="recipe-input" id="manual-name" placeholder="e.g. Chicken tikka masala">
+        <div class="recipe-field-label">Cook time</div>
+        <input class="recipe-input" id="manual-time" placeholder="e.g. 30 mins">
+        <div class="recipe-field-label">Which day pool?</div>
+        <div class="recipe-day-pills" id="manual-day-pills"></div>
+        <div class="recipe-field-label">How to serve <span style="color:var(--text3);font-size:10px;text-transform:none;letter-spacing:0">(adults)</span></div>
+        <input class="recipe-input" id="manual-adults" placeholder="e.g. Serve with steamed rice and naan">
+        <div id="manual-kids-section">
+          <div class="recipe-field-label">Kids version</div>
+          <input class="recipe-input" id="manual-kids" placeholder="e.g. Mild version with plain rice">
+        </div>
+        <div class="recipe-field-label">Ingredients (one per line, e.g. Chicken breast — 500g)</div>
+        <textarea class="recipe-textarea" id="manual-ingredients" rows="5" placeholder="Chicken breast — 500g&#10;Basmati rice — 2 cups&#10;Tikka paste — 3 tbsp"></textarea>
+        <div class="recipe-field-label">Steps (one per line)</div>
+        <textarea class="recipe-textarea" id="manual-steps" rows="5" placeholder="Marinate chicken in tikka paste for 30 mins&#10;Cook rice per packet&#10;Fry chicken until golden..."></textarea>
+        <div class="recipe-field-label">Tip</div>
+        <input class="recipe-input" id="manual-tip" placeholder="e.g. Great for batch cooking">
+        <button class="recipe-save-btn" id="manual-save-btn">Add to my meal rotation</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Main app -->
 <div class="app-shell hidden" id="app-shell">
   <header class="app-header">
@@ -384,6 +557,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
       <div class="app-logo">what's for <span>dinner?</span></div>
       <div class="header-right">
         <div class="sync-status"><div class="sync-dot" id="sync-dot"></div><span id="sync-lbl">Connecting</span></div>
+        <button class="btn-print" id="btn-print" title="Print week">🖨</button>
         <button class="header-btn" id="btn-regen">↺ New week</button>
         <button class="account-btn" id="btn-account">?</button>
       </div>
@@ -425,13 +599,14 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
         <div class="notes-head"><span class="notes-label">Shopping notes</span><span class="notes-saved" id="saved2">Saved ✓</span></div>
         <textarea class="notes-ta" id="notes2" placeholder="e.g. Get grass-fed mince from Coles. Check if we need parmesan…" rows="4"></textarea>
       </div>
-      <div class="notes-card">
+      <div class="notes-card" id="kids-note-card">
         <div class="notes-head"><span class="notes-label">Kid wins & fails</span><span class="notes-saved" id="saved3">Saved ✓</span></div>
         <textarea class="notes-ta" id="notes3" placeholder="e.g. Both kids ate butter chicken! Rissoles — Mia refused, Ollie loved…" rows="4"></textarea>
       </div>
     </div>
     <div class="panel" id="panel-favourites">
       <p class="section-sub">Your family's staple meals — all built into your weekly plan.</p>
+      <button class="scan-btn" id="btn-add-recipe" style="margin-bottom:16px">+ Add your own recipe</button>
       <div id="fav-list"></div>
     </div>
     <div class="panel" id="panel-history">
@@ -968,6 +1143,7 @@ function finishOnboarding(generatedMeals){
   saveToFirebase();
   setTimeout(function(){
     showScreen('app-shell');
+    applyKidsMode();
     refreshTab();
   },800);
 }
@@ -1129,6 +1305,14 @@ function renderPlan(){
     suggestions.forEach(function(s){
       suggHTML+='<div class="leftover-banner"><span class="leftover-banner-text">Leftover <strong>'+s+'</strong> available</span><div class="leftover-banner-btns"><button class="btn-lo-use" data-w="'+w+'" data-i="'+i+'" data-s="'+s+'">Use it</button><button class="btn-lo-skip" data-w="'+w+'" data-i="'+i+'" data-s="'+s+'">Skip</button></div></div>';
     });
+    var portions=item.portions||{};
+    var defaultAdults=(S.profile&&S.profile.adults)||2;
+    var defaultKids=(S.profile&&S.profile.kids)||0;
+    var portAdults=portions.adults!=null?portions.adults:defaultAdults;
+    var portKids=portions.kids!=null?portions.kids:defaultKids;
+    var hasKidsProfile=(S.profile&&S.profile.kids>0);
+    var isDefaultPort=(portAdults===defaultAdults&&portKids===defaultKids);
+    var portionsLabel=!isDefaultPort?(portAdults+' adults'+(hasKidsProfile&&portKids>0?', '+portKids+' kids':'')):null;
     if(swappingWeek===w&&swapping===i){
       card.innerHTML=suggHTML+'<div class="card-top"><div class="card-day-row"><span class="day-pill">'+day+'</span></div><div class="meal-name">'+meal.name+'</div></div><div class="loading-card" style="border-radius:0;border:none;border-top:0.5px solid var(--border)">Finding a swap…</div>';
       c.appendChild(card);return;
@@ -1143,16 +1327,24 @@ function renderPlan(){
         '<div class="meal-name-row"><div class="meal-name">'+meal.name+'</div>'+recipeHintHTML+'</div>'+
         '<div class="card-time">'+meal.cookTime+'</div>'+
       '</div>'+
-      '<div class="card-versions">'+
-        '<div class="ver"><div class="ver-label">Kids</div><div class="ver-desc">'+meal.kids+'</div></div>'+
-        '<div class="ver"><div class="ver-label">Adults</div><div class="ver-desc">'+meal.adults+'</div></div>'+
-      '</div>'+
+      (function(){
+        var hasKids=(S.profile&&S.profile.kids>0);
+        if(hasKids){
+          return '<div class="card-versions"><div class="ver"><div class="ver-label">Kids ('+S.profile.kidsAges+')</div><div class="ver-desc">'+meal.kids+'</div></div><div class="ver"><div class="ver-label">Adults</div><div class="ver-desc">'+meal.adults+'</div></div></div>';
+        } else {
+          return '<div class="card-versions" style="grid-template-columns:1fr"><div class="ver" style="border:none"><div class="ver-label">How to serve</div><div class="ver-desc">'+meal.adults+'</div></div></div>';
+        }
+      })()+
       '<div class="card-footer">'+
         '<span class="card-tip">'+meal.tip+'</span>'+
+        (portionsLabel?'<span class="portions-badge">'+portionsLabel+'</span>':'')+
+        (!done?'<button class="btn-card btn-portions-c">👥</button>':'')+
         (!done?'<button class="btn-card btn-swap-c">Swap</button>':'')+
         '<button class="btn-card'+(done?' done-active':'')+' btn-done-c">'+(done?'✓ Done':'Mark done')+'</button>'+
       '</div>';
     if(hasRecipe){var ct=card.querySelector('.card-top');ct.addEventListener('click',function(){openRecipe(w,i);});}
+    var pb=card.querySelector('.btn-portions-c');
+    if(pb)pb.addEventListener('click',function(e){e.stopPropagation();openPortions(w,i);});
     card.querySelector('.btn-done-c').addEventListener('click',function(e){e.stopPropagation();toggleDone(w,i);});
     var sb=card.querySelector('.btn-swap-c');
     if(sb)sb.addEventListener('click',function(e){e.stopPropagation();swapMeal(w,i);});
@@ -1601,7 +1793,7 @@ function refreshTab(){
   if(activeTab==='meals'){renderWeekStrip();renderWeekHeader();renderPlan();}
   else if(activeTab==='shopping')renderShoppingList();
   else if(activeTab==='pantry')renderPantry();
-  else if(activeTab==='notes')syncNotesToTextareas();
+  else if(activeTab==='notes'){syncNotesToTextareas();applyKidsMode();}
   else if(activeTab==='favourites')renderFavourites();
   else if(activeTab==='history')renderHistory();
 }
@@ -1629,6 +1821,238 @@ setupNoteListener('notes1','saved1','notes1');
 setupNoteListener('notes2','saved2','notes2');
 setupNoteListener('notes3','saved3','notes3');
 document.getElementById('week-strip-wrap').style.display='block';
+
+// ── No-kids mode ──
+function applyKidsMode(){
+  var hasKids=(S.profile&&S.profile.kids>0);
+  var kidsNoteCard=document.getElementById('kids-note-card');
+  if(kidsNoteCard)kidsNoteCard.style.display=hasKids?'':'none';
+  var manualKids=document.getElementById('manual-kids-section');
+  if(manualKids)manualKids.style.display=hasKids?'':'none';
+}
+
+// ── Portions ──
+var portionsWeek=null,portionsDay=null;
+function openPortions(w,i){
+  portionsWeek=w;portionsDay=i;
+  var item=S.weeks[w][i];
+  var portions=item.portions||{};
+  var defAdults=(S.profile&&S.profile.adults)||2;
+  var defKids=(S.profile&&S.profile.kids)||0;
+  document.getElementById('portions-meal-name').textContent=item.meal.name;
+  document.getElementById('portions-adults-val').textContent=portions.adults!=null?portions.adults:defAdults;
+  document.getElementById('portions-kids-val').textContent=portions.kids!=null?portions.kids:defKids;
+  var hasKids=(S.profile&&S.profile.kids>0);
+  document.getElementById('portions-kids-row').style.display=hasKids?'':'none';
+  document.getElementById('portions-overlay').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+function closePortions(){document.getElementById('portions-overlay').classList.add('hidden');document.body.style.overflow='';}
+document.getElementById('portions-overlay').addEventListener('click',function(e){if(e.target===this)closePortions();});
+document.getElementById('portions-adults-minus').addEventListener('click',function(){var v=parseInt(document.getElementById('portions-adults-val').textContent);if(v>1)document.getElementById('portions-adults-val').textContent=v-1;});
+document.getElementById('portions-adults-plus').addEventListener('click',function(){var v=parseInt(document.getElementById('portions-adults-val').textContent);if(v<20)document.getElementById('portions-adults-val').textContent=v+1;});
+document.getElementById('portions-kids-minus').addEventListener('click',function(){var v=parseInt(document.getElementById('portions-kids-val').textContent);if(v>0)document.getElementById('portions-kids-val').textContent=v-1;});
+document.getElementById('portions-kids-plus').addEventListener('click',function(){var v=parseInt(document.getElementById('portions-kids-val').textContent);if(v<20)document.getElementById('portions-kids-val').textContent=v+1;});
+document.getElementById('portions-save-btn').addEventListener('click',function(){
+  if(portionsWeek===null)return;
+  S.weeks[portionsWeek][portionsDay].portions={
+    adults:parseInt(document.getElementById('portions-adults-val').textContent),
+    kids:parseInt(document.getElementById('portions-kids-val').textContent)
+  };
+  saveToFirebase();renderPlan();closePortions();
+});
+
+// ── PDF Print ──
+document.getElementById('btn-print').addEventListener('click',function(){
+  // Make sure meals panel is active for print
+  var wasTab=activeTab;
+  if(activeTab!=='meals'){switchTab('meals');}
+  setTimeout(function(){window.print();},200);
+});
+
+// ── Add Recipe ──
+var generatedRecipePhoto=null,generatedRecipeUrl=null;
+
+document.getElementById('btn-add-recipe').addEventListener('click',function(){
+  document.getElementById('recipe-add-overlay').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+  applyKidsMode();
+  renderRecipeDayPills();
+});
+document.getElementById('recipe-add-close').addEventListener('click',closeRecipeAdd);
+document.getElementById('recipe-add-overlay').addEventListener('click',function(e){if(e.target===this)closeRecipeAdd();});
+function closeRecipeAdd(){document.getElementById('recipe-add-overlay').classList.add('hidden');document.body.style.overflow='';}
+
+// Method tabs
+document.querySelectorAll('.method-tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.method-tab').forEach(function(t){t.classList.remove('active');});
+    document.querySelectorAll('.method-panel').forEach(function(p){p.classList.remove('active');});
+    tab.classList.add('active');
+    document.getElementById('method-'+tab.dataset.method).classList.add('active');
+  });
+});
+
+function renderRecipeDayPills(){
+  var pools=['Sunday','Tuesday','Wednesday','Thursday'];
+  ['recipe-photo-day-pills','recipe-url-day-pills','manual-day-pills'].forEach(function(id){
+    var c=document.getElementById(id);if(!c)return;
+    c.innerHTML='';
+    pools.forEach(function(day){
+      var p=document.createElement('div');
+      p.className='ob-pill'+(day==='Tuesday'?' selected':'');
+      p.textContent=day;p.dataset.day=day;
+      p.addEventListener('click',function(){
+        c.querySelectorAll('.ob-pill').forEach(function(x){x.classList.remove('selected');});
+        p.classList.add('selected');
+      });
+      c.appendChild(p);
+    });
+  });
+}
+
+function getSelectedDay(pillsId){
+  var sel=document.querySelector('#'+pillsId+' .ob-pill.selected');
+  return sel?sel.dataset.day:'Tuesday';
+}
+
+// Photo recipe
+document.getElementById('recipe-photo-input').addEventListener('change',function(e){
+  var file=e.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var preview=document.getElementById('recipe-photo-preview');
+    preview.src=ev.target.result;preview.style.display='block';
+    document.getElementById('recipe-photo-drop').style.display='none';
+    document.getElementById('recipe-generate-btn').style.display='block';
+    // Store compressed version
+    var img=new Image();
+    img.onload=function(){
+      var canvas=document.createElement('canvas');
+      var MAX=1200;var w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*(MAX/w));w=MAX;}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      generatedRecipePhoto=canvas.toDataURL('image/jpeg',0.8).split(',')[1];
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('recipe-generate-btn').addEventListener('click',function(){
+  if(!generatedRecipePhoto)return;
+  var btn=this;btn.disabled=true;btn.textContent='Reading recipe...';
+  document.getElementById('recipe-photo-status').innerHTML='<span class="spinner"></span> Extracting recipe from photo...';
+  var hasKids=(S.profile&&S.profile.kids>0);
+  var prompt='This is a photo of a recipe from a book or magazine. Extract the full recipe and return it as a JSON object with these exact fields: {"name":"","cookTime":"","tip":"","adults":"","kids":"","ingredients":[{"n":"","q":""}],"steps":[{"n":1,"t":""}],"badge":"quick","badgeLabel":"Quick"}. For the tip field write one practical cooking tip. For adults write how to serve for adults. '+(hasKids?'For kids write a simpler mild version for young children.':'Set kids to the same as adults.')+' Make the steps clear and practical. Return ONLY valid JSON, no markdown.';
+  fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:generatedRecipePhoto}},{type:'text',text:prompt}]}]})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var raw=(data.content&&data.content[0]&&data.content[0].text)||'{}';
+    raw=raw.replace(/```json|```/g,'').trim();
+    try{
+      generatedRecipePhoto._parsed=JSON.parse(raw);
+      var meal=generatedRecipePhoto._parsed;
+      document.getElementById('recipe-generated-name').textContent=meal.name||'Recipe';
+      document.getElementById('recipe-generated-desc').textContent=(meal.ingredients||[]).slice(0,4).map(function(i){return i.n;}).join(', ')+'...';
+      document.getElementById('recipe-generated-preview').style.display='block';
+      document.getElementById('recipe-photo-day-wrap').style.display='block';
+      document.getElementById('recipe-photo-status').textContent='Recipe extracted! Choose which day to add it to.';
+      // Store parsed on window for save
+      window._photoRecipe=meal;
+    }catch(e){document.getElementById('recipe-photo-status').textContent='Could not read the recipe clearly. Try a better-lit photo.';}
+    btn.disabled=false;btn.textContent='Read recipe from photo';
+  }).catch(function(){
+    document.getElementById('recipe-photo-status').textContent='Something went wrong. Please try again.';
+    btn.disabled=false;btn.textContent='Read recipe from photo';
+  });
+});
+
+document.getElementById('recipe-photo-save-btn').addEventListener('click',function(){
+  var meal=window._photoRecipe;if(!meal)return;
+  var day=getSelectedDay('recipe-photo-day-pills');
+  meal.day=day;
+  saveCustomRecipe(meal);
+  closeRecipeAdd();
+});
+
+// URL recipe
+document.getElementById('recipe-url-fetch-btn').addEventListener('click',function(){
+  var url=document.getElementById('recipe-url-input').value.trim();
+  if(!url){document.getElementById('recipe-url-status').textContent='Please enter a URL.';return;}
+  var btn=this;btn.disabled=true;btn.textContent='Fetching...';
+  document.getElementById('recipe-url-status').innerHTML='<span class="spinner"></span> Fetching recipe from URL...';
+  var hasKids=(S.profile&&S.profile.kids>0);
+  var prompt='Please fetch and read the recipe at this URL: '+url+'. Extract the full recipe and return it as a JSON object with these exact fields: {"name":"","cookTime":"","tip":"","adults":"","kids":"","ingredients":[{"n":"","q":""}],"steps":[{"n":1,"t":""}],"badge":"quick","badgeLabel":"Quick"}. For adults write how to serve. '+(hasKids?'For kids write a simpler mild version.':'Set kids same as adults.')+' Return ONLY valid JSON, no markdown.';
+  fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'text',text:prompt}]}]})})
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var raw=(data.content&&data.content[0]&&data.content[0].text)||'{}';
+    raw=raw.replace(/```json|```/g,'').trim();
+    try{
+      var meal=JSON.parse(raw);
+      document.getElementById('recipe-url-name').textContent=meal.name||'Recipe';
+      document.getElementById('recipe-url-desc').textContent=(meal.ingredients||[]).slice(0,4).map(function(i){return i.n;}).join(', ')+'...';
+      document.getElementById('recipe-url-preview').style.display='block';
+      document.getElementById('recipe-url-day-wrap').style.display='block';
+      document.getElementById('recipe-url-status').textContent='Recipe found! Choose which day to add it to.';
+      window._urlRecipe=meal;
+    }catch(e){document.getElementById('recipe-url-status').textContent='Could not extract recipe from that URL. Try copying the recipe text and using manual entry.';}
+    btn.disabled=false;btn.textContent='Extract recipe from URL';
+  }).catch(function(){
+    document.getElementById('recipe-url-status').textContent='Something went wrong. Please try again.';
+    btn.disabled=false;btn.textContent='Extract recipe from URL';
+  });
+});
+
+document.getElementById('recipe-url-save-btn').addEventListener('click',function(){
+  var meal=window._urlRecipe;if(!meal)return;
+  var day=getSelectedDay('recipe-url-day-pills');
+  meal.day=day;
+  saveCustomRecipe(meal);
+  closeRecipeAdd();
+});
+
+// Manual recipe
+document.getElementById('manual-save-btn').addEventListener('click',function(){
+  var name=document.getElementById('manual-name').value.trim();
+  if(!name){alert('Please enter a recipe name.');return;}
+  var hasKids=(S.profile&&S.profile.kids>0);
+  var ings=document.getElementById('manual-ingredients').value.trim().split('\n').filter(Boolean).map(function(line,idx){
+    var parts=line.split('--').map(function(p){return p.trim();});
+    return {n:parts[0]||line,q:parts[1]||''};
+  });
+  var stps=document.getElementById('manual-steps').value.trim().split('\n').filter(Boolean).map(function(line,idx){
+    return {n:idx+1,t:line.trim()};
+  });
+  var meal={
+    name:name,
+    cookTime:document.getElementById('manual-time').value.trim()||'30 mins',
+    adults:document.getElementById('manual-adults').value.trim()||'Serve as desired',
+    kids:hasKids?(document.getElementById('manual-kids').value.trim()||document.getElementById('manual-adults').value.trim()):document.getElementById('manual-adults').value.trim(),
+    tip:document.getElementById('manual-tip').value.trim()||'',
+    ingredients:ings,
+    steps:stps,
+    badge:'quick',badgeLabel:'Quick',
+    day:getSelectedDay('manual-day-pills')
+  };
+  saveCustomRecipe(meal);
+  closeRecipeAdd();
+});
+
+function saveCustomRecipe(meal){
+  if(!S.userMeals)S.userMeals=[];
+  // Ensure required fields
+  meal.badge=meal.badge||'quick';
+  meal.badgeLabel=meal.badgeLabel||'Quick';
+  meal.canLeftoverTo=meal.canLeftoverTo||[];
+  S.userMeals.push(meal);
+  mergeUserMeals(S.userMeals);
+  saveToFirebase();
+  renderFavourites();
+  alert('"'+meal.name+'" added to your '+meal.day+' meal rotation!');
+}
 </script>
 </body>
 </html>
