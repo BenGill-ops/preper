@@ -2130,7 +2130,11 @@ document.getElementById('recipe-url-fetch-btn').addEventListener('click',functio
   var btn=this;btn.disabled=true;btn.textContent='Fetching...';
   document.getElementById('recipe-url-status').innerHTML='<span class="spinner"></span> Fetching recipe from URL...';
   var hasKids=(S.profile&&S.profile.kids>0);
-  var prompt='Please fetch and read the recipe at this URL: '+url+'. Extract the full recipe and return it as a JSON object with these exact fields: {"name":"","cookTime":"","tip":"","adults":"","kids":"","ingredients":[{"n":"","q":""}],"steps":[{"n":1,"t":""}],"badge":"quick","badgeLabel":"Quick"}. For adults write how to serve. '+(hasKids?'For kids write a simpler mild version.':'Set kids same as adults.')+' Return ONLY valid JSON, no markdown.';
+  // Extract recipe name from URL slug
+  var urlSlug=url.split('/').filter(Boolean).pop().replace(/[-_]/g,' ').replace(/\.\w+$/,'');
+  var recipeName=urlSlug.charAt(0).toUpperCase()+urlSlug.slice(1);
+  var hasKids2=(S.profile&&S.profile.kids>0);
+  var prompt='Generate a complete recipe for "'+recipeName+'" (from this URL: '+url+'). Return it as a JSON object with these exact fields: {"name":"'+recipeName+'","cookTime":"","tip":"","adults":"","kids":"","ingredients":[{"n":"","q":""}],"steps":[{"n":1,"t":""}],"badge":"quick","badgeLabel":"Quick"}. Make the recipe realistic and practical for a home cook. For adults write how to serve. '+(hasKids2?'For kids write a simpler mild version.':'Set kids same as adults.')+' Return ONLY valid JSON, no markdown.';
   fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'text',text:prompt}]}]})})
   .then(function(r){return r.json();})
   .then(function(data){
@@ -2139,10 +2143,13 @@ document.getElementById('recipe-url-fetch-btn').addEventListener('click',functio
     try{
       var meal=JSON.parse(raw);
       document.getElementById('recipe-url-name').textContent=meal.name||'Recipe';
-      document.getElementById('recipe-url-desc').textContent=(meal.ingredients||[]).slice(0,4).map(function(i){return i.n;}).join(', ')+'...';
+      document.getElementById('recipe-url-desc').textContent=
+        (meal.ingredients&&meal.ingredients.length?
+          (meal.ingredients||[]).slice(0,5).map(function(i){return i.n;}).join(', ')+'...':
+          (meal.adults||''));
       document.getElementById('recipe-url-preview').style.display='block';
       document.getElementById('recipe-url-day-wrap').style.display='block';
-      document.getElementById('recipe-url-status').textContent='Recipe found! Choose which day to add it to.';
+      document.getElementById('recipe-url-status').textContent='Recipe found: "'+meal.name+'". Choose which day to add it to.';
       window._urlRecipe=meal;
     }catch(e){document.getElementById('recipe-url-status').textContent='Could not extract recipe from that URL. Try copying the recipe text and using manual entry.';}
     btn.disabled=false;btn.textContent='Extract recipe from URL';
