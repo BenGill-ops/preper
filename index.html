@@ -933,7 +933,7 @@ function loadUserData(){
       if(S.profile&&S.profile.plannedDays&&S.profile.plannedDays.length)WEEK_DAYS=S.profile.plannedDays.slice();
       if(S.userMeals&&S.userMeals.length)mergeUserMeals(S.userMeals);
       // Now repair corrupted weeks
-      var rawWeeks=d.weeks||[];
+      var rawWeeks=restoreFromFirebase(d.weeks||[]);
       S.weeks=rawWeeks.map(function(w){
         if(!w)return null;
         if(!Array.isArray(w)){
@@ -1312,18 +1312,45 @@ async function generateUserMealsAndPlan(){
 }
 
 function sanitiseForFirebase(obj){
-  // Firebase doesn't support nested arrays at the TOP level of a document
-  // But our weeks structure is fine — it's an array of arrays of objects
-  // We just need to ensure no raw nested arrays exist in profile fields
+  if(obj===null||obj===undefined)return null;
+  if(typeof obj==='string'||typeof obj==='number'||typeof obj==='boolean')return obj;
+  if(Array.isArray(obj)){
+    return obj.map(function(item){
+      if(Array.isArray(item)){
+        // Wrap nested arrays as objects — e.g. weeks array
+        return {_isArray:true,items:item.map(function(v){return sanitiseForFirebase(v);})};
+      }
+      return sanitiseForFirebase(item);
+    });
+  }
+  if(typeof obj==='object'){
+    var clean={};
+    Object.keys(obj).forEach(function(k){
+      clean[k]=sanitiseForFirebase(obj[k]);
+    });
+    return clean;
+  }
+  return obj;
+}
+
+function restoreFromFirebase(obj){
+  // Reverse the sanitisation — restore wrapped arrays
   if(obj===null||obj===undefined)return obj;
   if(typeof obj!=='object')return obj;
   if(Array.isArray(obj)){
-    return obj.map(function(item){return sanitiseForFirebase(item);});
+    return obj.map(function(item){
+      if(item&&item._isArray&&item.items){
+        return item.items.map(function(v){return restoreFromFirebase(v);});
+      }
+      return restoreFromFirebase(item);
+    });
+  }
+  if(obj._isArray&&obj.items){
+    return obj.items.map(function(v){return restoreFromFirebase(v);});
   }
   var clean={};
   Object.keys(obj).forEach(function(k){
-    var v=obj[k];
-    clean[k]=sanitiseForFirebase(v);
+    clean[k]=restoreFromFirebase(obj[k]);
   });
   return clean;
 }
