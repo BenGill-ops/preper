@@ -41,7 +41,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 
 /* ── Onboarding ── */
 .onboard-screen{position:fixed;inset:0;background:var(--bg);z-index:800;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0}
-.ob-header{padding:calc(var(--safe-top) + 20px) 24px 16px;display:flex;align-items:center;justify-content:space-between}
+.ob-header{padding:calc(var(--safe-top) + 20px) 24px 16px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:10}
 .ob-back{font-size:13px;color:var(--text3);cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:4px}
 .ob-skip{font-size:13px;color:var(--text3);cursor:pointer}
 .ob-progress-bar{height:3px;background:var(--bg3);margin:0 24px}
@@ -1234,7 +1234,9 @@ document.getElementById('ob-next').addEventListener('click',advanceObStep);
 document.getElementById('ob-back').addEventListener('click',function(){
   if(obStep>0){obStep--;renderObStep();}
 });
-document.getElementById('ob-skip').addEventListener('click',function(){
+document.getElementById('ob-skip').addEventListener('click',function(e){
+  e.preventDefault();
+  e.stopPropagation();
   // Ensure obData has minimum required fields
   if(!obData.plannedDays||!obData.plannedDays.length){
     obData.plannedDays=['Sunday','Monday','Tuesday','Wednesday','Thursday'];
@@ -1242,7 +1244,12 @@ document.getElementById('ob-skip').addEventListener('click',function(){
   if(!obData.batchDay)obData.batchDay='Sunday';
   if(!obData.leftoverDays||!obData.leftoverDays.length)obData.leftoverDays=['Monday'];
   if(!obData.pantryTicked||!obData.pantryTicked.length)obData.pantryTicked=DEFAULT_PANTRY.slice();
-  finishOnboarding([]);
+  try{
+    finishOnboarding([]);
+  }catch(err){
+    console.error('Skip failed:',err);
+    alert('Skip error: '+err.message);
+  }
 });
 
 async function generateUserMealsAndPlan(){
