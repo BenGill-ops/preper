@@ -989,6 +989,9 @@ function renderObStep(){
   var pct=Math.round((obStep/OB_STEPS)*100);
   document.getElementById('ob-progress').style.width=pct+'%';
   document.getElementById('ob-back').style.visibility=obStep===0?'hidden':'visible';
+  document.getElementById('ob-back').style.display='';
+  document.getElementById('ob-skip').style.display='';
+  document.getElementById('ob-next').style.display='';
   var body=document.getElementById('ob-body');
   var nextBtn=document.getElementById('ob-next');
   nextBtn.disabled=false;
