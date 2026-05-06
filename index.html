@@ -2137,56 +2137,103 @@ function lastHadLabel(mealName){
 function renderFavourites(filterText){
   var c=document.getElementById('fav-list');c.innerHTML='';
   filterText=(filterText||'').toLowerCase().trim();
-  var allMeals=[];
+
+  // Three categories:
+  // 1. My staples = user meals generated during onboarding (S.userMeals)
+  // 2. My custom = manually added recipes (also in S.userMeals but added later)
+  // 3. Default pool = built-in meals they can browse and add
+
+  var myStaples=(S.userMeals||[]).filter(function(m){return !m._addedLater;});
+  var myCustom=(S.userMeals||[]).filter(function(m){return m._addedLater;});
+
+  // Build default pool (excluding anything already in userMeals)
+  var userMealNames=new Set((S.userMeals||[]).map(function(m){return m.name;}));
+  var defaultPool=[];
   var seen=new Set();
   Object.keys(MEALS).forEach(function(day){
     MEALS[day].forEach(function(m){
-      if(m.badge!=='leftovers'&&!seen.has(m.name)){seen.add(m.name);allMeals.push({meal:m,isCustom:false});}
+      if(m.badge!=='leftovers'&&!seen.has(m.name)&&!userMealNames.has(m.name)){
+        seen.add(m.name);
+        defaultPool.push(m);
+      }
     });
   });
-  (S.userMeals||[]).forEach(function(m){
-    if(!seen.has(m.name)){seen.add(m.name);allMeals.push({meal:m,isCustom:true});}
-  });
-  if(filterText){allMeals=allMeals.filter(function(item){return item.meal.name.toLowerCase().includes(filterText);});}
-  if(!allMeals.length){c.innerHTML='<div class="empty"><span class="empty-icon">\uD83C\uDF7D</span>No meals found.</div>';return;}
-  allMeals.sort(function(a,b){
-    var wa=getLastHad(a.meal.name);var wb=getLastHad(b.meal.name);
-    if(a.isCustom&&!b.isCustom)return -1;
-    if(!a.isCustom&&b.isCustom)return 1;
-    if(wa===null&&wb!==null)return -1;
-    if(wa!==null&&wb===null)return 1;
-    if(wa===null&&wb===null)return 0;
-    return wb-wa;
-  });
-  var customMeals=allMeals.filter(function(i){return i.isCustom;});
-  var defaultMeals=allMeals.filter(function(i){return !i.isCustom;});
-  function renderSection(items,title){
-    if(!items.length)return;
-    if(title&&!filterText){var lbl=document.createElement('div');lbl.className='recipe-section-lbl';lbl.textContent=title;c.appendChild(lbl);}
-    items.forEach(function(item){
-      var m=item.meal;
-      var card=document.createElement('div');
-      card.className='recipe-card'+(item.isCustom?' custom':'');
-      var b=m.badge==='batch'?'Batch cook':m.badge==='weekend'?'Weekend':'Quick';
-      var w=getLastHad(m.name);
-      var lastHad=lastHadLabel(m.name);
-      var lastHadHtml=lastHad===null?'<span class="recipe-never">Never tried</span>':
-        lastHad==='This week'?'<span class="recipe-last-had">This week</span>':
-        '<span class="'+(w>=3?'recipe-overdue':'recipe-last-had')+'">'+lastHad+'</span>';
-      var customBadge=item.isCustom?'<span class="choose-item-custom">Custom</span>':'';
-      var isShared=(S.sharedRecipes&&S.sharedRecipes[m.name]);
-      var shareBtn=item.isCustom?('<button class="share-btn'+(isShared?' shared':'')+' data-name="'+m.name+'" data-sharebtn="1">'+(isShared?'✓ Shared':'Share')+'</button>'):'';
-      var deleteBtn=item.isCustom?'<button class="recipe-delete-btn" data-name="'+m.name+'" title="Remove">\u{1F5D1}</button>':'';
-      card.innerHTML='<div class="recipe-card-head"><div class="recipe-card-name">'+m.name+'</div>'+customBadge+'<span class="badge badge-'+m.badge+'">'+b+'</span><span style="font-size:11px;color:var(--text3);margin-left:4px">'+m.cookTime+'</span>'+shareBtn+deleteBtn+'</div><div class="recipe-card-foot"><span class="recipe-card-tip">'+(m.tip||'')+'</span>'+lastHadHtml+'</div>';
-      var delBtn=card.querySelector('.recipe-delete-btn');
-      if(delBtn){delBtn.addEventListener('click',function(e){e.stopPropagation();var name=delBtn.dataset.name;if(confirm('Remove "'+name+'" from your recipes?')){S.userMeals=(S.userMeals||[]).filter(function(mr){return mr.name!==name;});mergeUserMeals(S.userMeals);saveToFirebase();renderFavourites(filterText);}});}
-      var shareB=card.querySelector('[data-sharebtn]');
-      if(shareB){shareB.addEventListener('click',function(e){e.stopPropagation();shareRecipeToCommmunity(shareB.dataset.name);});}
-      c.appendChild(card);
-    });
+
+  // Filter all by search
+  if(filterText){
+    var combined=[].concat(
+      myStaples.map(function(m){return {meal:m,isCustom:true,section:'staple'};}),
+      myCustom.map(function(m){return {meal:m,isCustom:true,section:'custom'};}),
+      defaultPool.map(function(m){return {meal:m,isCustom:false,section:'default'};})
+    ).filter(function(i){return i.meal.name.toLowerCase().includes(filterText);});
+    if(!combined.length){c.innerHTML='<div class="empty"><span class="empty-icon">\uD83C\uDF7D</span>No meals found.</div>';return;}
+    renderMealCards(combined,c,filterText);
+    return;
   }
-  if(filterText){renderSection(allMeals,'');}
-  else{renderSection(customMeals,'Your custom recipes');renderSection(defaultMeals,'All staple meals');}
+
+  // ── Section 1: My staple meals ──
+  if(myStaples.length){
+    var lbl1=document.createElement('div');lbl1.className='recipe-section-lbl';lbl1.textContent='My staple meals';c.appendChild(lbl1);
+    var sub1=document.createElement('div');sub1.style.cssText='font-size:12px;color:var(--text3);margin-bottom:10px;margin-top:-6px';sub1.textContent='Generated during setup — these are in your weekly rotation.';c.appendChild(sub1);
+    renderMealCards(myStaples.map(function(m){return {meal:m,isCustom:true,section:'staple'};}),c,filterText);
+  }
+
+  // ── Section 2: My custom recipes ──
+  if(myCustom.length){
+    var lbl2=document.createElement('div');lbl2.className='recipe-section-lbl';lbl2.style.marginTop='20px';lbl2.textContent='My custom recipes';c.appendChild(lbl2);
+    renderMealCards(myCustom.map(function(m){return {meal:m,isCustom:true,section:'custom'};}),c,filterText);
+  }
+
+  // ── Section 3: Browse & add meals ──
+  if(defaultPool.length){
+    var lbl3=document.createElement('div');lbl3.className='recipe-section-lbl';lbl3.style.marginTop='20px';lbl3.textContent='Browse & add to your rotation';c.appendChild(lbl3);
+    var sub3=document.createElement('div');sub3.style.cssText='font-size:12px;color:var(--text3);margin-bottom:10px;margin-top:-6px';sub3.textContent='Tap + Add on any meal to add it to your weekly plan.';c.appendChild(sub3);
+    renderMealCards(defaultPool.map(function(m){return {meal:m,isCustom:false,section:'default'};}),c,filterText);
+  }
+}
+
+function renderMealCards(items,c,filterText){
+  items.forEach(function(item){
+    var m=item.meal;
+    var card=document.createElement('div');
+    card.className='recipe-card'+(item.isCustom?' custom':'');
+    var b=m.badge==='batch'?'Batch cook':m.badge==='weekend'?'Weekend':'Quick';
+    var w=getLastHad(m.name);
+    var lastHad=lastHadLabel(m.name);
+    var lastHadHtml=lastHad===null?'<span class="recipe-never">Never tried</span>':
+      lastHad==='This week'?'<span class="recipe-last-had">This week</span>':
+      '<span class="'+(w>=3?'recipe-overdue':'recipe-last-had')+'">'+lastHad+'</span>';
+    var customBadge=item.isCustom?'<span class="choose-item-custom">'+(item.section==='staple'?'Staple':'Custom')+'</span>':'';
+    var isShared=(S.sharedRecipes&&S.sharedRecipes[m.name]);
+    var shareBtn=item.isCustom?('<button class="share-btn'+(isShared?' shared':'')+' data-name="'+m.name+'" data-sharebtn="1">'+(isShared?'\u2713 Shared':'Share')+'</button>'):'';
+    var deleteBtn=item.isCustom?'<button class="recipe-delete-btn" data-name="'+m.name+'" title="Remove">\u{1F5D1}</button>':'';
+    // Browse meals get an "+ Add" button instead
+    var addBtn=!item.isCustom?'<button class="community-add-btn" data-addmeal="1">+ Add</button>':'';
+    card.innerHTML='<div class="recipe-card-head"><div class="recipe-card-name">'+m.name+'</div>'+customBadge+'<span class="badge badge-'+m.badge+'">'+b+'</span><span style="font-size:11px;color:var(--text3);margin-left:4px">'+m.cookTime+'</span>'+shareBtn+addBtn+deleteBtn+'</div><div class="recipe-card-foot"><span class="recipe-card-tip">'+(m.tip||'')+'</span>'+lastHadHtml+'</div>';
+    // Add to rotation button
+    var addB=card.querySelector('[data-addmeal]');
+    if(addB){
+      addB.addEventListener('click',function(e){
+        e.stopPropagation();
+        var copy=Object.assign({},m,{_addedLater:true});
+        if(!(S.userMeals||[]).find(function(um){return um.name===m.name;})){
+          S.userMeals=S.userMeals||[];
+          S.userMeals.push(copy);
+          mergeUserMeals(S.userMeals);
+          saveToFirebase();
+        }
+        addB.textContent='Added \u2713';
+        addB.disabled=true;
+        addB.style.background='var(--bg3)';addB.style.color='var(--text3)';addB.style.border='0.5px solid var(--border2)';
+        setTimeout(function(){renderFavourites(filterText);},800);
+      });
+    }
+    var delBtn=card.querySelector('.recipe-delete-btn');
+    if(delBtn){delBtn.addEventListener('click',function(e){e.stopPropagation();var name=delBtn.dataset.name;if(confirm('Remove "'+name+'" from your recipes?')){S.userMeals=(S.userMeals||[]).filter(function(mr){return mr.name!==name;});mergeUserMeals(S.userMeals);saveToFirebase();renderFavourites(filterText);}});}
+    var shareB=card.querySelector('[data-sharebtn]');
+    if(shareB){shareB.addEventListener('click',function(e){e.stopPropagation();shareRecipeToCommmunity(shareB.dataset.name);});}
+    c.appendChild(card);
+  });
 }
 
 // ── History ──
@@ -2481,10 +2528,10 @@ document.getElementById('manual-save-btn').addEventListener('click',function(){
 
 function saveCustomRecipe(meal){
   if(!S.userMeals)S.userMeals=[];
-  // Ensure required fields
   meal.badge=meal.badge||'quick';
   meal.badgeLabel=meal.badgeLabel||'Quick';
   meal.canLeftoverTo=meal.canLeftoverTo||[];
+  meal._addedLater=true;
   S.userMeals.push(meal);
   mergeUserMeals(S.userMeals);
   saveToFirebase();
