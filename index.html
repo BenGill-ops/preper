@@ -917,8 +917,6 @@ function loadUserData(){
     if(snap.exists){
       var d=snap.data();
       S.weeks=d.weeks||[];
-      // Ensure weeks is array of arrays (not corrupted)
-      S.weeks=S.weeks.filter(function(w){return Array.isArray(w);});
       S.weekStartDates=d.weekStartDates||[];
       S.pastWeeks=d.pastWeeks||[];
       S.lastAdvancedDate=d.lastAdvancedDate||null;
@@ -931,10 +929,20 @@ function loadUserData(){
       S.notes1=d.notes1||'';S.notes2=d.notes2||'';S.notes3=d.notes3||'';
       S.userMeals=d.userMeals||[];
       S.profile=d.profile||{};
-      // Merge user meals into MEALS pool
-      if(S.userMeals&&S.userMeals.length)mergeUserMeals(S.userMeals);
-      // Restore planned days from profile
+      // Restore planned days and meals FIRST before building weeks
       if(S.profile&&S.profile.plannedDays&&S.profile.plannedDays.length)WEEK_DAYS=S.profile.plannedDays.slice();
+      if(S.userMeals&&S.userMeals.length)mergeUserMeals(S.userMeals);
+      // Now repair corrupted weeks
+      var rawWeeks=d.weeks||[];
+      S.weeks=rawWeeks.map(function(w){
+        if(!w)return null;
+        if(!Array.isArray(w)){
+          var vals=Object.values(w);
+          if(vals.length&&vals[0]&&vals[0].day)return vals;
+          return null;
+        }
+        return w;
+      }).filter(function(w){return w&&Array.isArray(w)&&w.length>0;});
       // Check if setup done
       if(!S.profile.setupDone){
         startOnboarding();
@@ -1235,8 +1243,12 @@ async function generateUserMealsAndPlan(){
   var generatedMeals=[];
   if(obData.stapleNames.length>0){
     try{
-      var prompt='You are building a family dinner planner app. The user has listed their family\'s staple meals. For each meal, generate a structured meal object.\n\nFamily profile:\n- Adults: '+obData.adults+', Kids: '+obData.kids+(obData.kidsAges?' (ages '+obData.kidsAges+')':'')+'\n- Dietary needs: '+(obData.dietary.join(', ')||'None')+'\n- Kids\' food adventurousness: '+obData.kidsAdventure+'\n- Preferred cuisines: '+(obData.cuisines.join(', ')||'Varied')+'\n- Typical weeknight cook time: '+obData.cookTime+'\n\nTheir staple meals: '+obData.stapleNames.join(', ')+'\n\nFor EACH meal, return a JSON object with these exact fields:\n{\n  "name": "Meal name",\n  "day": "Tuesday", // which day pool it belongs to: Sunday (batch cook), Monday (leftovers), Tuesday, Wednesday, or Thursday\n  "badge": "quick", // "quick", "batch", or "leftovers"\n  "badgeLabel": "Quick",\n  "kids": "Kid-friendly version description",\n  "adults": "Adult version description with any extras",\n  "tip": "One practical tip for this meal",\n  "cookTime": "25 mins",\n  "ingredients": [{"n": "Ingredient name", "q": "quantity"}],\n  "steps": [{"n": 1, "t": "Step text with <b>key items bolded</b>"}]\n}\n\nReturn ONLY a valid JSON array of these objects. No markdown, no explanation. Distribute meals sensibly across Tuesday, Wednesday and Thursday. Batch cook meals that make leftovers should be Sunday. Keep kid versions simple and mild. Adult versions can have more flavour, spice or complexity.';
-      var resp=await fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]})});
+      var prompt='You are building a family dinner planner app. The user has listed their family\'s staple meals. For each meal, generate a structured meal object.\n\nFamily profile:\n- Adults: '+obData.adults+', Kids: '+obData.kids+(obData.kidsAges?' (ages '+obData.kidsAges+')':'')+'\n- Dietary needs: '+(obData.dietary.join(', ')||'None')+'\n- Kids\' food adventurousness: '+obData.kidsAdventure+'\n- Preferred cuisines: '+(obData.cuisines.join(', ')||'Varied')+'\n- Typical weeknight cook time: '+obData.cookTime+'\n\nTheir staple meals: '+obData.stapleNames.join(', ')+'\n\nFor EACH meal, return a JSON object with these exact fields:\n{\n  "name": "Meal name",\n  "day": "Tuesday",\n  "badge": "quick",\n  "badgeLabel": "Quick",\n  "kids": "Kid-friendly version description",\n  "adults": "Adult version description with any extras",\n  "tip": "One practical tip for this meal",\n  "cookTime": "25 mins",\n  "ingredients": [{"n": "Ingredient name", "q": "quantity"}],\n  "steps": [{"n": 1, "t": "Step text with <b>key items bolded</b>"}]\n}\n\nReturn ONLY a valid JSON array of these objects. No markdown, no explanation. Distribute meals across Tuesday, Wednesday and Thursday. Batch cook meals go to Sunday. Keep kid versions simple and mild.';
+      // Add timeout so it never hangs forever
+      var controller=new AbortController();
+      var timeoutId=setTimeout(function(){controller.abort();},25000);
+      var resp=await fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]}),signal:controller.signal});
+      clearTimeout(timeoutId);
       var data=await resp.json();
       var raw=(data.content&&data.content[0]&&data.content[0].text)||'[]';
       raw=raw.replace(/```json|```/g,'').trim();
