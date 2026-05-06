@@ -2046,11 +2046,11 @@ function renderFavourites(filterText){
       card.innerHTML='<div class="recipe-card-head"><div class="recipe-card-name">'+m.name+'</div>'+customBadge+'<span class="badge badge-'+m.badge+'">'+b+'</span><span style="font-size:11px;color:var(--text3);margin-left:4px">'+m.cookTime+'</span>'+shareBtn+deleteBtn+'</div><div class="recipe-card-foot"><span class="recipe-card-tip">'+(m.tip||'')+'</span>'+lastHadHtml+'</div>';
       var delBtn=card.querySelector('.recipe-delete-btn');
       if(delBtn){delBtn.addEventListener('click',function(e){e.stopPropagation();var name=delBtn.dataset.name;if(confirm('Remove "'+name+'" from your recipes?')){S.userMeals=(S.userMeals||[]).filter(function(mr){return mr.name!==name;});mergeUserMeals(S.userMeals);saveToFirebase();renderFavourites(filterText);}});}
+      var shareB=card.querySelector('[data-sharebtn]');
+      if(shareB){shareB.addEventListener('click',function(e){e.stopPropagation();shareRecipeToCommmunity(shareB.dataset.name);});}
       c.appendChild(card);
     });
   }
-      var shareB=card.querySelector('[data-sharebtn]');
-      if(shareB){shareB.addEventListener('click',function(e){e.stopPropagation();shareRecipeToCommmunity(shareB.dataset.name);});}
   if(filterText){renderSection(allMeals,'');}
   else{renderSection(customMeals,'Your custom recipes');renderSection(defaultMeals,'All staple meals');}
 }
