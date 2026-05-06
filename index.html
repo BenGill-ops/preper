@@ -1265,12 +1265,14 @@ function finishOnboarding(generatedMeals){
   WEEK_DAYS=obData.plannedDays.slice();
   if(generatedMeals.length)mergeUserMeals(generatedMeals);
   S.weeks=buildAllWeeks();
-  saveToFirebase();
-  setTimeout(function(){
-    showScreen('app-shell');
-    applyKidsMode();
-    refreshTab();
-  },800);
+  // Write directly and wait for confirmation so setupDone is guaranteed in Firestore
+  function launchApp(){showScreen('app-shell');applyKidsMode();refreshTab();}
+  if(userDoc){
+    setSyncStatus('saving');
+    userDoc.set(S).then(function(){setSyncStatus('live');launchApp();}).catch(function(e){console.error('Onboarding save failed:',e);setSyncStatus('offline');launchApp();});
+  } else {
+    launchApp();
+  }
 }
 
 // ── Meal plan helpers ──
