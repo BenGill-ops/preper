@@ -115,7 +115,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .account-btn{width:30px;height:30px;border-radius:50%;background:var(--green-bg);border:0.5px solid var(--green-border);color:var(--green);font-family:var(--font-body);font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
 /* ── Account menu ── */
-.account-menu{position:fixed;top:calc(var(--safe-top) + 60px);right:calc(50% - 230px);background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:8px;z-index:300;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.account-menu{position:fixed;top:calc(var(--safe-top) + 60px);right:8px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:8px;z-index:300;min-width:200px;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
 .account-menu.hidden{display:none}
 .acct-name{font-size:13px;color:var(--text2);padding:8px 12px 10px;border-bottom:0.5px solid var(--border);margin-bottom:6px}
 .acct-item{font-size:13px;color:var(--text2);padding:10px 12px;border-radius:var(--radius-xs);cursor:pointer;display:flex;align-items:center;gap:8px}
@@ -287,7 +287,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .empty{text-align:center;padding:36px 20px;color:var(--text3);font-size:14px;line-height:1.6}
 .empty-icon{font-size:34px;margin-bottom:12px;display:block;opacity:0.4}
 .sm-btn{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-body);font-size:11px;font-weight:500;padding:6px 12px;cursor:pointer}
-@media(min-width:481px){body{background:#070710}.app-shell,.bottom-nav{border-left:0.5px solid var(--border);border-right:0.5px solid var(--border)}.app-shell{box-shadow:0 0 60px rgba(0,0,0,0.6)}}
+@media(min-width:481px){body{background:#070710}.app-shell,.bottom-nav{border-left:0.5px solid var(--border);border-right:0.5px solid var(--border)}.app-shell{box-shadow:0 0 60px rgba(0,0,0,0.6)}.account-menu,.print-menu{right:calc(50% - 232px)}}
 /* ── Calendar week tabs ── */
 .week-tab.is-current::after{content:'';position:absolute;top:6px;right:6px;width:5px;height:5px;border-radius:50%;background:var(--green)}
 .week-tab{position:relative}
@@ -429,7 +429,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 }
 .print-header{display:none}
 .btn-print{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-body);font-size:11px;font-weight:500;padding:6px 10px;cursor:pointer}
-.print-menu{position:absolute;top:calc(var(--safe-top) + 56px);right:calc(50% - 230px);background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:6px;z-index:300;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
+.print-menu{position:fixed;top:calc(var(--safe-top) + 56px);right:8px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-sm);padding:6px;z-index:300;min-width:180px;box-shadow:0 8px 32px rgba(0,0,0,0.4)}
 .print-menu.hidden{display:none}
 .print-menu-item{font-size:13px;color:var(--text2);padding:10px 12px;border-radius:var(--radius-xs);cursor:pointer;display:flex;align-items:center;gap:8px}
 .print-menu-item:hover{background:var(--bg3)}
@@ -2662,8 +2662,9 @@ function renderProfileSummary(){
 document.getElementById('btn-account').addEventListener('click',function(e){
   e.stopPropagation();
   document.getElementById('account-menu').classList.toggle('hidden');
+  document.getElementById('print-menu').classList.add('hidden');
   renderProfileSummary();
-},true); // use capture to run before existing listener
+});
 
 </script>
 </body>
