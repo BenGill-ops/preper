@@ -1235,6 +1235,13 @@ document.getElementById('ob-back').addEventListener('click',function(){
   if(obStep>0){obStep--;renderObStep();}
 });
 document.getElementById('ob-skip').addEventListener('click',function(){
+  // Ensure obData has minimum required fields
+  if(!obData.plannedDays||!obData.plannedDays.length){
+    obData.plannedDays=['Sunday','Monday','Tuesday','Wednesday','Thursday'];
+  }
+  if(!obData.batchDay)obData.batchDay='Sunday';
+  if(!obData.leftoverDays||!obData.leftoverDays.length)obData.leftoverDays=['Monday'];
+  if(!obData.pantryTicked||!obData.pantryTicked.length)obData.pantryTicked=DEFAULT_PANTRY.slice();
   finishOnboarding([]);
 });
 
@@ -1315,21 +1322,21 @@ function sanitiseForFirebase(obj){
 }
 
 function finishOnboarding(generatedMeals){
-  S.userMeals=generatedMeals;
-  S.pantryStaples=obData.pantryTicked;
+  S.userMeals=generatedMeals||[];
+  S.pantryStaples=(obData.pantryTicked&&obData.pantryTicked.length)?obData.pantryTicked:DEFAULT_PANTRY.slice();
   S.profile={
     setupDone:true,
-    familyName:obData.familyName,
-    adults:obData.adults,
-    kids:obData.kids,
-    kidsAges:obData.kidsAges,
-    dietary:obData.dietary.slice(),
-    cookTime:obData.cookTime,
-    cuisines:obData.cuisines.slice(),
-    kidsAdventure:obData.kidsAdventure,
-    plannedDays:obData.plannedDays.slice(),
-    batchDay:obData.batchDay,
-    leftoverDays:obData.leftoverDays.slice()
+    familyName:obData.familyName||'',
+    adults:obData.adults||2,
+    kids:obData.kids!=null?obData.kids:0,
+    kidsAges:obData.kidsAges||'',
+    dietary:(obData.dietary||[]).slice(),
+    cookTime:obData.cookTime||'20-40 mins',
+    cuisines:(obData.cuisines||[]).slice(),
+    kidsAdventure:obData.kidsAdventure||'Moderate',
+    plannedDays:(obData.plannedDays||['Sunday','Monday','Tuesday','Wednesday','Thursday']).slice(),
+    batchDay:obData.batchDay||'Sunday',
+    leftoverDays:(obData.leftoverDays||['Monday']).slice()
   };
   // Update WEEK_DAYS to match chosen planned days
   WEEK_DAYS=obData.plannedDays.slice();
