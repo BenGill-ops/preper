@@ -288,6 +288,21 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--font-body);mi
 .empty-icon{font-size:34px;margin-bottom:12px;display:block;opacity:0.4}
 .sm-btn{background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text2);font-family:var(--font-body);font-size:11px;font-weight:500;padding:6px 12px;cursor:pointer}
 @media(min-width:481px){body{background:#070710}.app-shell,.bottom-nav{border-left:0.5px solid var(--border);border-right:0.5px solid var(--border)}.app-shell{box-shadow:0 0 60px rgba(0,0,0,0.6)}.account-menu,.print-menu{right:calc(50% - 232px)}}
+.community-add-btn{background:var(--green);color:#0f0f1a;border:none;border-radius:var(--radius-xs);font-family:var(--font-body);font-size:11px;font-weight:500;padding:5px 10px;cursor:pointer;flex-shrink:0;white-space:nowrap}
+.community-add-btn:active{opacity:0.85}
+.community-add-btn:disabled{background:var(--bg3)!important;color:var(--text3)!important;border:0.5px solid var(--border2)!important;cursor:default}
+.share-btn{background:var(--teal-bg);color:var(--teal);border:0.5px solid var(--teal-border);border-radius:var(--radius-xs);font-family:var(--font-body);font-size:11px;font-weight:500;padding:5px 10px;cursor:pointer;flex-shrink:0;white-space:nowrap}
+.share-btn:active{opacity:0.85}
+.share-btn.shared{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+.community-card{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden}
+.community-card-head{padding:11px 13px;display:flex;align-items:center;gap:8px}
+.community-card-name{font-family:var(--font-display);font-size:14px;font-weight:400;color:var(--text);flex:1}
+.community-card-foot{padding:0 13px 10px;font-size:12px;color:var(--text3);font-style:italic}
+.community-search{margin-bottom:12px}
+.community-search input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-family:var(--font-body);font-size:14px;padding:10px 13px;outline:none}
+.community-search input:focus{border-color:var(--green)}
+.community-search input::placeholder{color:var(--text3)}
+.community-empty{text-align:center;padding:24px 0;color:var(--text3);font-size:13px}
 /* ── Calendar week tabs ── */
 .week-tab.is-current::after{content:'';position:absolute;top:6px;right:6px;width:5px;height:5px;border-radius:50%;background:var(--green)}
 .week-tab{position:relative}
