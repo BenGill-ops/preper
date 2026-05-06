@@ -906,7 +906,7 @@ function saveToFirebase(){
   clearTimeout(saveTimer);setSyncStatus('saving');
   saveTimer=setTimeout(function(){
     if(!userDoc)return;
-    userDoc.set(S).then(function(){setSyncStatus('live');}).catch(function(e){console.error(e);setSyncStatus('offline');});
+    userDoc.set(sanitiseForFirebase(S)).then(function(){setSyncStatus('live');}).catch(function(e){console.error(e);setSyncStatus('offline');});
   },700);
 }
 
@@ -1251,6 +1251,30 @@ async function generateUserMealsAndPlan(){
   markStep(3,true);
 }
 
+function sanitiseForFirebase(obj){
+  // Firebase doesn't support nested arrays — flatten any array values that are arrays
+  if(Array.isArray(obj)){
+    return obj.map(function(item){return sanitiseForFirebase(item);});
+  }
+  if(obj&&typeof obj==='object'&&!(obj instanceof Date)){
+    var clean={};
+    Object.keys(obj).forEach(function(k){
+      var v=obj[k];
+      if(Array.isArray(v)){
+        // Flatten nested arrays by converting inner arrays to strings
+        clean[k]=v.map(function(item){
+          if(Array.isArray(item))return JSON.stringify(item);
+          return sanitiseForFirebase(item);
+        });
+      } else {
+        clean[k]=sanitiseForFirebase(v);
+      }
+    });
+    return clean;
+  }
+  return obj;
+}
+
 function finishOnboarding(generatedMeals){
   S.userMeals=generatedMeals;
   S.pantryStaples=obData.pantryTicked;
@@ -1260,13 +1284,13 @@ function finishOnboarding(generatedMeals){
     adults:obData.adults,
     kids:obData.kids,
     kidsAges:obData.kidsAges,
-    dietary:obData.dietary,
+    dietary:obData.dietary.slice(),
     cookTime:obData.cookTime,
-    cuisines:obData.cuisines,
+    cuisines:obData.cuisines.slice(),
     kidsAdventure:obData.kidsAdventure,
-    plannedDays:obData.plannedDays,
+    plannedDays:obData.plannedDays.slice(),
     batchDay:obData.batchDay,
-    leftoverDays:obData.leftoverDays
+    leftoverDays:obData.leftoverDays.slice()
   };
   // Update WEEK_DAYS to match chosen planned days
   WEEK_DAYS=obData.plannedDays.slice();
@@ -1276,7 +1300,7 @@ function finishOnboarding(generatedMeals){
   function launchApp(){showScreen('app-shell');applyKidsMode();refreshTab();}
   if(userDoc){
     setSyncStatus('saving');
-    userDoc.set(S).then(function(){setSyncStatus('live');launchApp();}).catch(function(e){console.error('Onboarding save failed:',e);setSyncStatus('offline');launchApp();});
+    userDoc.set(sanitiseForFirebase(S)).then(function(){setSyncStatus('live');launchApp();}).catch(function(e){console.error('Onboarding save failed:',e);setSyncStatus('offline');launchApp();});
   } else {
     launchApp();
   }
@@ -2636,9 +2660,12 @@ document.querySelectorAll('.method-tab').forEach(function(tab){
 });
 
 // Community search
-document.getElementById('community-search-input').addEventListener('input',function(){
-  loadCommunityRecipes(this.value);
-});
+var communitySearchInput=document.getElementById('community-search-input');
+if(communitySearchInput){
+  communitySearchInput.addEventListener('input',function(){
+    loadCommunityRecipes(this.value);
+  });
+}
 
 // ── Profile summary in account menu ──
 function renderProfileSummary(){
