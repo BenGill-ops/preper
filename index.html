@@ -1021,7 +1021,7 @@ function renderObStep(){
   }
   else if(obStep===3){
     var SUGGESTED_MEALS=['Spaghetti bolognese','Chicken stir-fry with noodles','Pesto chicken pasta','Tacos','Roast chicken','Slow-roasted lamb','Baked risotto','Sticky Asian beef bowl','Rissoles with mash & gravy','Baked meatballs with mash','Homemade pizza','Marry me chicken with broccoli','Butter chicken & rice','Beef nachos','Fish tacos','Sheet pan chicken & veggies','Pulled pork with slaw','Chicken fried rice','Sausages with mash & gravy','Salmon with miso glaze'];
-    body.innerHTML='<div class="ob-step-label">Step 4 of '+OB_STEPS+'</div><div class="ob-title">Your family\'s <span>staple meals</span></div><div class="ob-sub">Add the meals your family loves. Tap any suggestions below or type your own — Claude builds full recipes with kid and adult versions from whatever you add.</div><div class="ob-section-label">Popular meal ideas — tap to add</div><div class="ob-suggested-meals" id="ob-suggested-chips"></div><div class="ob-section-label" style="margin-top:20px">Your meals</div><div style="display:flex;gap:8px;margin-bottom:12px"><input class="ob-input" style="margin:0;flex:1" id="ob-meal-input" placeholder="e.g. chicken stir fry, lamb roast…"><button class="add-btn" id="ob-meal-add-btn">Add</button></div><div id="ob-meal-tags"></div>';
+    body.innerHTML='<div class="ob-step-label">Step 4 of '+OB_STEPS+'</div><div class="ob-title">Your family\'s <span>staple meals</span></div><div class="ob-sub">Add up to 5 meals your family loves. Claude builds full recipes with kid and adult versions from whatever you add — you can always add more later from the Recipes tab.</div><div class="ob-section-label">Popular meal ideas — tap to add</div><div class="ob-suggested-meals" id="ob-suggested-chips"></div><div class="ob-section-label" style="margin-top:20px">Your meals <span style="color:var(--text3);font-weight:400;font-size:11px">(max 5 for best results)</span></div><div style="display:flex;gap:8px;margin-bottom:12px"><input class="ob-input" style="margin:0;flex:1" id="ob-meal-input" placeholder="e.g. chicken stir fry, lamb roast…"><button class="add-btn" id="ob-meal-add-btn">Add</button></div><div id="ob-meal-tags"></div>';
     document.getElementById('ob-meal-input').addEventListener('keydown',function(e){if(e.key==='Enter'){addStaleMeal();}});
     document.getElementById('ob-meal-add-btn').addEventListener('click',addStaleMeal);
     // Render suggestion chips
@@ -1199,9 +1199,13 @@ function addStaleMeal(){
   var inp=document.getElementById('ob-meal-input');
   var v=inp.value.trim();
   if(!v)return;
+  if(obData.stapleNames.length>=5){
+    inp.value='';
+    return;
+  }
   v.split(',').forEach(function(m){
     var trimmed=m.trim();
-    if(trimmed&&!obData.stapleNames.includes(trimmed))obData.stapleNames.push(trimmed);
+    if(trimmed&&!obData.stapleNames.includes(trimmed)&&obData.stapleNames.length<5)obData.stapleNames.push(trimmed);
   });
   inp.value='';
   renderMealTags();
@@ -1268,7 +1272,7 @@ async function generateUserMealsAndPlan(){
   if(obData.stapleNames.length>0){
     setStatus('Sending your meals to Claude…');
     try{
-      // Only send first 5 meals to keep prompt small and fast
+      // Only send first 5 meals to keep response within token limits
       var mealsList=obData.stapleNames.slice(0,5).join(', ');
       var prompt='Generate dinner recipes for a family. Meals requested: '+mealsList+'. For each meal return a JSON object: {"name":"","day":"Tuesday","badge":"quick","badgeLabel":"Quick","kids":"simple kid version","adults":"adult version","tip":"one tip","cookTime":"30 mins","ingredients":[{"n":"ingredient","q":"amount"}],"steps":[{"n":1,"t":"step"}]}. Day options: Sunday=batch cook, Tuesday/Wednesday/Thursday=weeknight. Return ONLY a JSON array. No markdown.';
       var controller=new AbortController();
