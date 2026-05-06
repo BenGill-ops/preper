@@ -877,10 +877,7 @@ document.getElementById('btn-forgot-password').addEventListener('click',function
 });
 
 // Account menu
-document.getElementById('btn-account').addEventListener('click',function(e){
-  e.stopPropagation();
-  document.getElementById('account-menu').classList.toggle('hidden');
-});
+// account menu wired in community section
 document.addEventListener('click',function(){document.getElementById('account-menu').classList.add('hidden');});
 document.getElementById('acct-signout').addEventListener('click',function(){auth.signOut();});
 document.getElementById('acct-reset').addEventListener('click',function(){
@@ -916,6 +913,7 @@ function loadUserData(){
       S.weekStartDates=d.weekStartDates||[];
       S.pastWeeks=d.pastWeeks||[];
       S.lastAdvancedDate=d.lastAdvancedDate||null;
+      S.sharedRecipes=d.sharedRecipes||{};
       S.mealHistory=d.mealHistory||[];
       S.pantryStaples=d.pantryStaples||[].concat(DEFAULT_PANTRY);
       S.customStaples=d.customStaples||[];
@@ -2042,13 +2040,17 @@ function renderFavourites(filterText){
         lastHad==='This week'?'<span class="recipe-last-had">This week</span>':
         '<span class="'+(w>=3?'recipe-overdue':'recipe-last-had')+'">'+lastHad+'</span>';
       var customBadge=item.isCustom?'<span class="choose-item-custom">Custom</span>':'';
+      var isShared=(S.sharedRecipes&&S.sharedRecipes[m.name]);
+      var shareBtn=item.isCustom?('<button class="share-btn'+(isShared?' shared':'')+' data-name="'+m.name+'" data-sharebtn="1">'+(isShared?'✓ Shared':'Share')+'</button>'):'';
       var deleteBtn=item.isCustom?'<button class="recipe-delete-btn" data-name="'+m.name+'" title="Remove">\u{1F5D1}</button>':'';
-      card.innerHTML='<div class="recipe-card-head"><div class="recipe-card-name">'+m.name+'</div>'+customBadge+'<span class="badge badge-'+m.badge+'">'+b+'</span><span style="font-size:11px;color:var(--text3);margin-left:4px">'+m.cookTime+'</span>'+deleteBtn+'</div><div class="recipe-card-foot"><span class="recipe-card-tip">'+(m.tip||'')+'</span>'+lastHadHtml+'</div>';
+      card.innerHTML='<div class="recipe-card-head"><div class="recipe-card-name">'+m.name+'</div>'+customBadge+'<span class="badge badge-'+m.badge+'">'+b+'</span><span style="font-size:11px;color:var(--text3);margin-left:4px">'+m.cookTime+'</span>'+shareBtn+deleteBtn+'</div><div class="recipe-card-foot"><span class="recipe-card-tip">'+(m.tip||'')+'</span>'+lastHadHtml+'</div>';
       var delBtn=card.querySelector('.recipe-delete-btn');
       if(delBtn){delBtn.addEventListener('click',function(e){e.stopPropagation();var name=delBtn.dataset.name;if(confirm('Remove "'+name+'" from your recipes?')){S.userMeals=(S.userMeals||[]).filter(function(mr){return mr.name!==name;});mergeUserMeals(S.userMeals);saveToFirebase();renderFavourites(filterText);}});}
       c.appendChild(card);
     });
   }
+      var shareB=card.querySelector('[data-sharebtn]');
+      if(shareB){shareB.addEventListener('click',function(e){e.stopPropagation();shareRecipeToCommmunity(shareB.dataset.name);});}
   if(filterText){renderSection(allMeals,'');}
   else{renderSection(customMeals,'Your custom recipes');renderSection(defaultMeals,'All staple meals');}
 }
@@ -2529,6 +2531,138 @@ function renderShoppingWeekSelector(){
     c.appendChild(btn);
   }
 }
+
+
+// ── Community recipes ──
+if(!S.sharedRecipes)S.sharedRecipes={};
+
+function shareRecipeToCommmunity(name){
+  var meal=(S.userMeals||[]).find(function(m){return m.name===name;});
+  if(!meal){alert('Recipe not found.');return;}
+  if(S.sharedRecipes&&S.sharedRecipes[name]){
+    // Already shared — offer to unshare
+    if(confirm('Remove "'+name+'" from the community library?')){
+      db.collection('community').doc('recipes').collection('items').where('name','==',name).where('sharedBy','==',currentUser.uid).get().then(function(snap){
+        snap.forEach(function(doc){doc.ref.delete();});
+      });
+      if(!S.sharedRecipes)S.sharedRecipes={};
+      delete S.sharedRecipes[name];
+      saveToFirebase();
+      renderFavourites();
+    }
+    return;
+  }
+  // Share it
+  var sharedMeal=Object.assign({},meal,{
+    sharedBy:currentUser.uid,
+    sharedAt:Date.now()
+  });
+  db.collection('community').doc('recipes').collection('items').add(sharedMeal).then(function(ref){
+    if(!S.sharedRecipes)S.sharedRecipes={};
+    S.sharedRecipes[name]=ref.id;
+    saveToFirebase();
+    renderFavourites();
+    alert('"'+name+'" has been shared with the Preper community!');
+  }).catch(function(e){
+    alert('Could not share recipe: '+e.message);
+  });
+}
+
+function loadCommunityRecipes(filterText){
+  var c=document.getElementById('community-recipes-list');
+  if(!c)return;
+  c.innerHTML='<div class="community-empty">Loading community recipes...</div>';
+  filterText=(filterText||'').toLowerCase().trim();
+  db.collection('community').doc('recipes').collection('items').orderBy('sharedAt','desc').limit(50).get().then(function(snap){
+    var recipes=[];
+    snap.forEach(function(doc){
+      var d=doc.data();
+      d._id=doc.id;
+      recipes.push(d);
+    });
+    if(filterText){recipes=recipes.filter(function(r){return r.name&&r.name.toLowerCase().includes(filterText);});}
+    if(!recipes.length){c.innerHTML='<div class="community-empty">No community recipes yet — be the first to share one from your Recipes tab!</div>';return;}
+    c.innerHTML='';
+    recipes.forEach(function(meal){
+      var alreadyAdded=(S.userMeals||[]).some(function(m){return m.name===meal.name;});
+      var card=document.createElement('div');
+      card.className='community-card';
+      var b=meal.badge==='batch'?'Batch cook':meal.badge==='weekend'?'Weekend':'Quick';
+      card.innerHTML=
+        '<div class="community-card-head">'+
+          '<div class="community-card-name">'+meal.name+'</div>'+
+          '<span class="badge badge-'+(meal.badge||'quick')+'">'+b+'</span>'+
+          '<span style="font-size:11px;color:var(--text3);margin-left:4px">'+(meal.cookTime||'')+'</span>'+
+          '<button class="community-add-btn" data-added="'+(alreadyAdded?'1':'0')+'">'+(alreadyAdded?'Added':'+ Add')+'</button>'+
+        '</div>'+
+        (meal.tip?'<div class="community-card-foot">'+meal.tip+'</div>':'');
+      var addBtn=card.querySelector('.community-add-btn');
+      if(!alreadyAdded){
+        addBtn.addEventListener('click',function(){
+          var recipeCopy=Object.assign({},meal);
+          delete recipeCopy._id;delete recipeCopy.sharedBy;delete recipeCopy.sharedAt;
+          saveCustomRecipe(recipeCopy);
+          addBtn.textContent='Added';addBtn.dataset.added='1';
+          addBtn.style.background='var(--bg3)';addBtn.style.color='var(--text3)';addBtn.style.border='0.5px solid var(--border2)';
+          addBtn.disabled=true;
+        });
+      } else {
+        addBtn.disabled=true;
+        addBtn.style.background='var(--bg3)';addBtn.style.color='var(--text3)';addBtn.style.border='0.5px solid var(--border2)';
+      }
+      c.appendChild(card);
+    });
+  }).catch(function(e){
+    c.innerHTML='<div class="community-empty">Could not load community recipes. Check your connection.</div>';
+    console.error(e);
+  });
+}
+
+// Load community recipes when community tab is opened
+document.querySelectorAll('.method-tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    if(tab.dataset.method==='community'){
+      loadCommunityRecipes(document.getElementById('community-search-input').value||'');
+    }
+  });
+});
+
+// Community search
+document.getElementById('community-search-input').addEventListener('input',function(){
+  loadCommunityRecipes(this.value);
+});
+
+// ── Profile summary in account menu ──
+function renderProfileSummary(){
+  var p=S.profile||{};
+  var menu=document.getElementById('account-menu');
+  var existing=document.getElementById('profile-summary');
+  if(existing)existing.remove();
+  if(!p.setupDone)return;
+  var div=document.createElement('div');
+  div.id='profile-summary';
+  div.className='profile-summary';
+  var rows=[
+    ['Family',p.familyName||'—'],
+    ['Adults',p.adults||'—'],
+    ['Kids',p.kids!=null?p.kids:'—'],
+    ['Cook time',p.cookTime||'—'],
+    ['Dietary',(p.dietary&&p.dietary.length?p.dietary.join(', '):'None')]
+  ];
+  div.innerHTML=rows.map(function(r){
+    return '<div class="profile-row"><span class="profile-row-label">'+r[0]+'</span><span class="profile-row-value">'+r[1]+'</span></div>';
+  }).join('');
+  // Insert at top of menu
+  menu.insertBefore(div,menu.firstChild);
+}
+
+// Show profile summary when account menu opens
+document.getElementById('btn-account').addEventListener('click',function(e){
+  e.stopPropagation();
+  document.getElementById('account-menu').classList.toggle('hidden');
+  renderProfileSummary();
+},true); // use capture to run before existing listener
+
 </script>
 </body>
 </html>
