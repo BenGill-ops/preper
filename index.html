@@ -878,7 +878,10 @@ document.getElementById('btn-forgot-password').addEventListener('click',function
 
 // Account menu
 // account menu wired in community section
-document.addEventListener('click',function(){document.getElementById('account-menu').classList.add('hidden');});
+document.addEventListener('click',function(e){
+  if(!e.target.closest('#btn-account'))document.getElementById('account-menu').classList.add('hidden');
+  if(!e.target.closest('#btn-print'))document.getElementById('print-menu').classList.add('hidden');
+});
 document.getElementById('acct-signout').addEventListener('click',function(){auth.signOut();});
 document.getElementById('acct-reset').addEventListener('click',function(){
   if(confirm('This will reset your meal plan and redo the setup. Are you sure?')){
@@ -2146,8 +2149,7 @@ document.getElementById('portions-save-btn').addEventListener('click',function()
 });
 
 // ── PDF Print ──
-document.getElementById('btn-print').addEventListener('click',function(e){
-  e.stopPropagation();
+document.getElementById('btn-print').addEventListener('click',function(){
   document.getElementById('print-menu').classList.toggle('hidden');
   document.getElementById('account-menu').classList.add('hidden');
 });
@@ -2167,8 +2169,7 @@ document.getElementById('print-plan').addEventListener('click',function(){doPrin
 document.getElementById('print-shopping').addEventListener('click',function(){doPrint('shopping');});
 document.getElementById('print-recipes').addEventListener('click',function(){doPrint('recipes');});
 
-// Close print menu on outside click
-document.addEventListener('click',function(){document.getElementById('print-menu').classList.add('hidden');});
+// Outside-click close is handled by the consolidated document listener above
 
 // ── Add Recipe ──
 var generatedRecipePhoto=null,generatedRecipeUrl=null;
@@ -2659,8 +2660,7 @@ function renderProfileSummary(){
 }
 
 // Show profile summary when account menu opens
-document.getElementById('btn-account').addEventListener('click',function(e){
-  e.stopPropagation();
+document.getElementById('btn-account').addEventListener('click',function(){
   document.getElementById('account-menu').classList.toggle('hidden');
   document.getElementById('print-menu').classList.add('hidden');
   renderProfileSummary();
