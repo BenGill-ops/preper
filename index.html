@@ -917,6 +917,8 @@ function loadUserData(){
     if(snap.exists){
       var d=snap.data();
       S.weeks=d.weeks||[];
+      // Ensure weeks is array of arrays (not corrupted)
+      S.weeks=S.weeks.filter(function(w){return Array.isArray(w);});
       S.weekStartDates=d.weekStartDates||[];
       S.pastWeeks=d.pastWeeks||[];
       S.lastAdvancedDate=d.lastAdvancedDate||null;
@@ -1252,27 +1254,20 @@ async function generateUserMealsAndPlan(){
 }
 
 function sanitiseForFirebase(obj){
-  // Firebase doesn't support nested arrays — flatten any array values that are arrays
+  // Firebase doesn't support nested arrays at the TOP level of a document
+  // But our weeks structure is fine — it's an array of arrays of objects
+  // We just need to ensure no raw nested arrays exist in profile fields
+  if(obj===null||obj===undefined)return obj;
+  if(typeof obj!=='object')return obj;
   if(Array.isArray(obj)){
     return obj.map(function(item){return sanitiseForFirebase(item);});
   }
-  if(obj&&typeof obj==='object'&&!(obj instanceof Date)){
-    var clean={};
-    Object.keys(obj).forEach(function(k){
-      var v=obj[k];
-      if(Array.isArray(v)){
-        // Flatten nested arrays by converting inner arrays to strings
-        clean[k]=v.map(function(item){
-          if(Array.isArray(item))return JSON.stringify(item);
-          return sanitiseForFirebase(item);
-        });
-      } else {
-        clean[k]=sanitiseForFirebase(v);
-      }
-    });
-    return clean;
-  }
-  return obj;
+  var clean={};
+  Object.keys(obj).forEach(function(k){
+    var v=obj[k];
+    clean[k]=sanitiseForFirebase(v);
+  });
+  return clean;
 }
 
 function finishOnboarding(generatedMeals){
@@ -1439,7 +1434,7 @@ function renderWeekStrip(){
 function renderWeekHeader(){
   var bar=document.getElementById('week-header-bar');
   var isPast=activeWeek<0;
-  var fn=S.profile&&S.profile.familyName?S.profile.familyName+"'s plan":'This week';
+  var fn=S.profile&&S.profile.familyName?(S.profile.familyName.replace(/['']s?\s*$/,'')+'\u2019s plan'):'This week';
   var headingText=activeWeek===0?fn:activeWeek<0?(activeWeek===-1?'Last week':'2 weeks ago'):getCalendarWeekLabel(activeWeek);
   var wOffset=activeWeek<0?activeWeek:activeWeek;
   var dateRange=formatWeekLabel(wOffset);
