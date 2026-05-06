@@ -1274,7 +1274,7 @@ async function generateUserMealsAndPlan(){
         controller.abort();
         setStatus('Taking too long — using default meals instead.');
       },20000);
-      var resp=await fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:4000,messages:[{role:'user',content:prompt}]}),signal:controller.signal});
+      var resp=await fetch('https://preper-api.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:4000,messages:[{role:'user',content:prompt}]}),signal:controller.signal});
       clearTimeout(timeoutId);
       if(!resp.ok){
         setStatus('Worker error ('+resp.status+') — using default meals.');
@@ -1986,7 +1986,7 @@ document.getElementById('scan-go-btn').addEventListener('click',function(){
   var prompt='Look at these photos of a fridge and pantry. Do two things: 1. List every food item, ingredient, sauce, condiment, spice, oil or pantry staple you can see across all photos. Be thorough and generous. 2. Cross-reference your list with these pantry staples and return any matches: '+JSON.stringify(allStaples)+'. For matches use common sense — Fairy spread matches Butter, a soy sauce bottle matches Soy sauce, eggs in a carton matches Eggs, a milk bottle matches Milk etc. Return ONLY a valid JSON object: {"identified": ["everything you can see"], "matched": ["items that match the pantry list"]}. No explanation, no markdown.';
   msgContent.push({type:'text',text:prompt});
 
-  fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:msgContent}]})})
+  fetch('https://preper-api.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:1000,messages:[{role:'user',content:msgContent}]})})
   .then(function(r){return r.json();})
   .then(function(data){
     var raw=(data.content&&data.content[0]&&data.content[0].text)||'{}';
@@ -2356,7 +2356,7 @@ document.getElementById('recipe-generate-btn').addEventListener('click',function
   document.getElementById('recipe-photo-status').innerHTML='<span class="spinner"></span> Extracting recipe from photo...';
   var hasKids=(S.profile&&S.profile.kids>0);
   var prompt='This is a photo of a recipe from a book or magazine. Extract the full recipe and return it as a JSON object with these exact fields: {"name":"","cookTime":"","tip":"","adults":"","kids":"","ingredients":[{"n":"","q":""}],"steps":[{"n":1,"t":""}],"badge":"quick","badgeLabel":"Quick"}. For the tip field write one practical cooking tip. For adults write how to serve for adults. '+(hasKids?'For kids write a simpler mild version for young children.':'Set kids to the same as adults.')+' Make the steps clear and practical. Return ONLY valid JSON, no markdown.';
-  fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:2000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:generatedRecipePhoto}},{type:'text',text:prompt}]}]})})
+  fetch('https://preper-api.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:2000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:generatedRecipePhoto}},{type:'text',text:prompt}]}]})})
   .then(function(r){return r.json();})
   .then(function(data){
     var raw=(data.content&&data.content[0]&&data.content[0].text)||'{}';
@@ -2399,7 +2399,7 @@ document.getElementById('recipe-url-fetch-btn').addEventListener('click',functio
   var recipeName=urlSlug.charAt(0).toUpperCase()+urlSlug.slice(1);
   var hasKids2=(S.profile&&S.profile.kids>0);
   var prompt='Generate a complete recipe for "'+recipeName+'" (from this URL: '+url+'). Return it as a JSON object with these exact fields: {"name":"'+recipeName+'","cookTime":"","tip":"","adults":"","kids":"","ingredients":[{"n":"","q":""}],"steps":[{"n":1,"t":""}],"badge":"quick","badgeLabel":"Quick"}. Make the recipe realistic and practical for a home cook. For adults write how to serve. '+(hasKids2?'For kids write a simpler mild version.':'Set kids same as adults.')+' Return ONLY valid JSON, no markdown.';
-  fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:2000,messages:[{role:'user',content:[{type:'text',text:prompt}]}]})})
+  fetch('https://preper-api.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-5',max_tokens:2000,messages:[{role:'user',content:[{type:'text',text:prompt}]}]})})
   .then(function(r){return r.json();})
   .then(function(data){
     var raw=(data.content&&data.content[0]&&data.content[0].text)||'{}';
