@@ -1268,13 +1268,15 @@ async function generateUserMealsAndPlan(){
   if(obData.stapleNames.length>0){
     setStatus('Sending your meals to Claude…');
     try{
-      var prompt='You are building a family dinner planner app. The user has listed their family\'s staple meals. For each meal, generate a structured meal object.\n\nFamily profile:\n- Adults: '+obData.adults+', Kids: '+obData.kids+(obData.kidsAges?' (ages '+obData.kidsAges+')':'')+'\n- Dietary needs: '+(obData.dietary.join(', ')||'None')+'\n- Kids\' food adventurousness: '+obData.kidsAdventure+'\n- Preferred cuisines: '+(obData.cuisines.join(', ')||'Varied')+'\n- Typical weeknight cook time: '+obData.cookTime+'\n\nTheir staple meals: '+obData.stapleNames.join(', ')+'\n\nFor EACH meal, return a JSON object with these exact fields:\n{\n  "name": "Meal name",\n  "day": "Tuesday",\n  "badge": "quick",\n  "badgeLabel": "Quick",\n  "kids": "Kid-friendly version description",\n  "adults": "Adult version description with any extras",\n  "tip": "One practical tip for this meal",\n  "cookTime": "25 mins",\n  "ingredients": [{"n": "Ingredient name", "q": "quantity"}],\n  "steps": [{"n": 1, "t": "Step text with <b>key items bolded</b>"}]\n}\n\nReturn ONLY a valid JSON array of these objects. No markdown, no explanation. Distribute meals across Tuesday, Wednesday and Thursday. Batch cook meals go to Sunday. Keep kid versions simple and mild.';
+      // Only send first 5 meals to keep prompt small and fast
+      var mealsList=obData.stapleNames.slice(0,5).join(', ');
+      var prompt='Generate dinner recipes for a family. Meals requested: '+mealsList+'. For each meal return a JSON object: {"name":"","day":"Tuesday","badge":"quick","badgeLabel":"Quick","kids":"simple kid version","adults":"adult version","tip":"one tip","cookTime":"30 mins","ingredients":[{"n":"ingredient","q":"amount"}],"steps":[{"n":1,"t":"step"}]}. Day options: Sunday=batch cook, Tuesday/Wednesday/Thursday=weeknight. Return ONLY a JSON array. No markdown.';
       var controller=new AbortController();
       var timeoutId=setTimeout(function(){
         controller.abort();
         setStatus('Taking too long — using default meals instead.');
       },55000);
-      var resp=await fetch('https://preper-api.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:2000,messages:[{role:'user',content:prompt}]}),signal:controller.signal});
+      var resp=await fetch('https://preper-api.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]}),signal:controller.signal});
       clearTimeout(timeoutId);
       if(!resp.ok){
         setStatus('Worker error ('+resp.status+') — using default meals.');
