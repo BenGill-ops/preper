@@ -1047,11 +1047,16 @@ function renderObStep(){
     renderObPantryGrid();
   }
   else if(obStep===5){
-    body.innerHTML='<div class="ob-step-label">Step 6 of '+OB_STEPS+'</div><div class="ob-title">Almost there! <span>Generating</span> your plan…</div><div class="ob-sub">We\'re building your personalised meal pool and 4-week plan. This takes about 30 seconds.</div><div class="ob-generating" id="ob-generating"><div class="fs-spinner"></div><div class="ob-generating-text">Talking to Claude…</div><div class="ob-gen-steps"><div class="ob-gen-step" id="gen-step-1">🍽 Building your staple meal recipes</div><div class="ob-gen-step" id="gen-step-2">👨‍👩‍👧‍👦 Adding kid & adult versions</div><div class="ob-gen-step" id="gen-step-3">📅 Planning your 4 weeks</div><div class="ob-gen-step" id="gen-step-4">✅ Almost done…</div></div></div>';
+    body.innerHTML='<div class="ob-step-label">Step 6 of '+OB_STEPS+'</div><div class="ob-title">Almost there! <span>Generating</span> your plan…</div><div class="ob-sub">We\'re building your personalised meal pool and 4-week plan. This takes about 30 seconds.</div><div class="ob-generating" id="ob-generating"><div class="fs-spinner"></div><div class="ob-generating-text">Talking to Claude…</div><div class="ob-gen-steps"><div class="ob-gen-step" id="gen-step-1">🍽 Building your staple meal recipes</div><div class="ob-gen-step" id="gen-step-2">👨‍👩‍👧‍👦 Adding kid & adult versions</div><div class="ob-gen-step" id="gen-step-3">📅 Planning your 4 weeks</div><div class="ob-gen-step" id="gen-step-4">✅ Almost done…</div></div><button id="ob-skip-gen" style="margin-top:24px;background:transparent;border:0.5px solid var(--border2);border-radius:var(--radius-sm);color:var(--text3);font-family:var(--font-body);font-size:13px;padding:10px 20px;cursor:pointer">Skip AI generation — use default meals</button></div>';
     nextBtn.style.display='none';
     document.getElementById('ob-skip').style.display='none';
     document.getElementById('ob-back').style.display='none';
     generateUserMealsAndPlan();
+    // Wire skip button — appears immediately so user can bail if stuck
+    setTimeout(function(){
+      var skipBtn=document.getElementById('ob-skip-gen');
+      if(skipBtn)skipBtn.addEventListener('click',function(){finishOnboarding([]);});
+    },100);
     return;
   }
 }
@@ -1239,21 +1244,36 @@ async function generateUserMealsAndPlan(){
     if(!el)return;
     el.className='ob-gen-step'+(done?' done':' active');
   }
+  function setStatus(msg){
+    var el=document.querySelector('.ob-generating-text');
+    if(el)el.textContent=msg;
+  }
   markStep(0,false);
   var generatedMeals=[];
   if(obData.stapleNames.length>0){
+    setStatus('Sending your meals to Claude…');
     try{
       var prompt='You are building a family dinner planner app. The user has listed their family\'s staple meals. For each meal, generate a structured meal object.\n\nFamily profile:\n- Adults: '+obData.adults+', Kids: '+obData.kids+(obData.kidsAges?' (ages '+obData.kidsAges+')':'')+'\n- Dietary needs: '+(obData.dietary.join(', ')||'None')+'\n- Kids\' food adventurousness: '+obData.kidsAdventure+'\n- Preferred cuisines: '+(obData.cuisines.join(', ')||'Varied')+'\n- Typical weeknight cook time: '+obData.cookTime+'\n\nTheir staple meals: '+obData.stapleNames.join(', ')+'\n\nFor EACH meal, return a JSON object with these exact fields:\n{\n  "name": "Meal name",\n  "day": "Tuesday",\n  "badge": "quick",\n  "badgeLabel": "Quick",\n  "kids": "Kid-friendly version description",\n  "adults": "Adult version description with any extras",\n  "tip": "One practical tip for this meal",\n  "cookTime": "25 mins",\n  "ingredients": [{"n": "Ingredient name", "q": "quantity"}],\n  "steps": [{"n": 1, "t": "Step text with <b>key items bolded</b>"}]\n}\n\nReturn ONLY a valid JSON array of these objects. No markdown, no explanation. Distribute meals across Tuesday, Wednesday and Thursday. Batch cook meals go to Sunday. Keep kid versions simple and mild.';
-      // Add timeout so it never hangs forever
       var controller=new AbortController();
-      var timeoutId=setTimeout(function(){controller.abort();},25000);
+      var timeoutId=setTimeout(function(){
+        controller.abort();
+        setStatus('Taking too long — using default meals instead.');
+      },20000);
       var resp=await fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]}),signal:controller.signal});
       clearTimeout(timeoutId);
+      setStatus('Claude responded — processing…');
       var data=await resp.json();
       var raw=(data.content&&data.content[0]&&data.content[0].text)||'[]';
       raw=raw.replace(/```json|```/g,'').trim();
       generatedMeals=JSON.parse(raw);
-    }catch(e){console.error('Meal gen error:',e);generatedMeals=[];}
+      setStatus('Got '+generatedMeals.length+' recipes!');
+    }catch(e){
+      console.error('Meal gen error:',e);
+      setStatus(e.name==='AbortError'?'Timed out — using default meals.':'Generation failed — using default meals.');
+      generatedMeals=[];
+    }
+  } else {
+    setStatus('No staple meals entered — using default meal pool.');
   }
   markStep(0,true);markStep(1,false);
   await new Promise(function(r){setTimeout(r,400);});
