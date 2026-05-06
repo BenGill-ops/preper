@@ -879,8 +879,12 @@ document.getElementById('btn-forgot-password').addEventListener('click',function
 // Account menu
 // account menu wired in community section
 document.addEventListener('click',function(e){
-  if(!e.target.closest('#btn-account'))document.getElementById('account-menu').classList.add('hidden');
-  if(!e.target.closest('#btn-print'))document.getElementById('print-menu').classList.add('hidden');
+  if(!e.target.closest('#account-menu')&&!e.target.closest('#btn-account')){
+    document.getElementById('account-menu').classList.add('hidden');
+  }
+  if(!e.target.closest('#print-menu')&&!e.target.closest('#btn-print')){
+    document.getElementById('print-menu').classList.add('hidden');
+  }
 });
 document.getElementById('acct-signout').addEventListener('click',function(){auth.signOut();});
 document.getElementById('acct-reset').addEventListener('click',function(){
@@ -2662,10 +2666,19 @@ function renderProfileSummary(){
 
 // Show profile summary when account menu opens
 document.getElementById('btn-account').addEventListener('click',function(e){
+  e.preventDefault();
   e.stopPropagation();
-  document.getElementById('account-menu').classList.toggle('hidden');
+  e.stopImmediatePropagation();
+  var menu=document.getElementById('account-menu');
+  var isHidden=menu.classList.contains('hidden');
+  // Close all menus first
+  document.getElementById('account-menu').classList.add('hidden');
   document.getElementById('print-menu').classList.add('hidden');
-  renderProfileSummary();
+  // Then open if it was closed
+  if(isHidden){
+    renderProfileSummary();
+    menu.classList.remove('hidden');
+  }
 });
 
 </script>
