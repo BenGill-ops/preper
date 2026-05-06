@@ -2149,7 +2149,8 @@ document.getElementById('portions-save-btn').addEventListener('click',function()
 });
 
 // ── PDF Print ──
-document.getElementById('btn-print').addEventListener('click',function(){
+document.getElementById('btn-print').addEventListener('click',function(e){
+  e.stopPropagation();
   document.getElementById('print-menu').classList.toggle('hidden');
   document.getElementById('account-menu').classList.add('hidden');
 });
@@ -2660,7 +2661,8 @@ function renderProfileSummary(){
 }
 
 // Show profile summary when account menu opens
-document.getElementById('btn-account').addEventListener('click',function(){
+document.getElementById('btn-account').addEventListener('click',function(e){
+  e.stopPropagation();
   document.getElementById('account-menu').classList.toggle('hidden');
   document.getElementById('print-menu').classList.add('hidden');
   renderProfileSummary();
