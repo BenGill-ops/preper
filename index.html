@@ -1232,9 +1232,7 @@ document.getElementById('ob-back').addEventListener('click',function(){
   if(obStep>0){obStep--;renderObStep();}
 });
 document.getElementById('ob-skip').addEventListener('click',function(){
-  if(confirm('Skip setup? You\'ll get a default plan — you can always redo this from the account menu.')){
-    finishOnboarding([]);
-  }
+  finishOnboarding([]);
 });
 
 async function generateUserMealsAndPlan(){
@@ -1261,12 +1259,23 @@ async function generateUserMealsAndPlan(){
       },20000);
       var resp=await fetch('https://preper.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]}),signal:controller.signal});
       clearTimeout(timeoutId);
-      setStatus('Claude responded — processing…');
-      var data=await resp.json();
-      var raw=(data.content&&data.content[0]&&data.content[0].text)||'[]';
-      raw=raw.replace(/```json|```/g,'').trim();
-      generatedMeals=JSON.parse(raw);
-      setStatus('Got '+generatedMeals.length+' recipes!');
+      if(!resp.ok){
+        setStatus('Worker error ('+resp.status+') — using default meals.');
+        generatedMeals=[];
+      } else {
+        setStatus('Claude responded — processing…');
+        var data=await resp.json();
+        var raw=(data.content&&data.content[0]&&data.content[0].text)||'[]';
+        raw=raw.replace(/```json|```/g,'').trim();
+        try{
+          generatedMeals=JSON.parse(raw);
+          setStatus('Got '+generatedMeals.length+' recipes!');
+        }catch(e){
+          console.error('Parse error:',e,'Raw:',raw);
+          setStatus('Could not parse recipes — using default meals.');
+          generatedMeals=[];
+        }
+      }
     }catch(e){
       console.error('Meal gen error:',e);
       setStatus(e.name==='AbortError'?'Timed out — using default meals.':'Generation failed — using default meals.');
