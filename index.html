@@ -1276,7 +1276,7 @@ async function generateUserMealsAndPlan(){
         controller.abort();
         setStatus('Taking too long — using default meals instead.');
       },55000);
-      var resp=await fetch('https://preper-api.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:1500,messages:[{role:'user',content:prompt}]}),signal:controller.signal});
+      var resp=await fetch('https://preper-api.lisa-massingham.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-haiku-4-5',max_tokens:3000,messages:[{role:'user',content:prompt}]}),signal:controller.signal});
       clearTimeout(timeoutId);
       if(!resp.ok){
         setStatus('Worker error ('+resp.status+') — using default meals.');
@@ -1290,9 +1290,24 @@ async function generateUserMealsAndPlan(){
           generatedMeals=JSON.parse(raw);
           setStatus('Got '+generatedMeals.length+' recipes!');
         }catch(e){
-          console.error('Parse error:',e,'Raw:',raw);
-          setStatus('Could not parse recipes — using default meals.');
-          generatedMeals=[];
+          // Try to recover partial JSON — find all complete objects
+          var partialMatches=raw.match(/\{[^{}]*"name"[^{}]*"steps"[\s\S]*?\}\s*\]/);
+          if(!partialMatches){
+            // Extract individual complete recipe objects
+            var recovered=[];
+            var objPattern=/\{[\s\S]*?"steps"[\s\S]*?\]\s*\}/g;
+            var match;
+            while((match=objPattern.exec(raw))!==null){
+              try{recovered.push(JSON.parse(match[0]));}catch(e2){}
+            }
+            generatedMeals=recovered;
+          }
+          if(!generatedMeals.length){
+            console.error('Parse error:',e,'Raw:',raw);
+            setStatus('Could not parse recipes — using default meals.');
+          } else {
+            setStatus('Got '+generatedMeals.length+' recipes!');
+          }
         }
       }
     }catch(e){
