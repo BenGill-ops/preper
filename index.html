@@ -1438,8 +1438,25 @@ function pickFresh(pool,exclude,usedThisMonth){
 function getMonday(sun){return MEALS.Monday.find(function(m){return m.leftoversFor===sun.leftoversKey;})||MEALS.Monday[0];}
 
 function getLeftoverMeal(batchMeal){
-  // Try to find a matching leftover meal from the Monday pool
-  return MEALS.Monday.find(function(m){return m.leftoversFor===batchMeal.leftoversKey;})||null;
+  // First try to find a matching leftover meal from the default Monday pool
+  var match=MEALS.Monday.find(function(m){return m.leftoversFor===batchMeal.leftoversKey;});
+  if(match)return match;
+  // For AI-generated or custom batch meals, auto-create a leftover version
+  if(batchMeal&&batchMeal.name){
+    return {
+      name:batchMeal.name+' (leftovers)',
+      badge:'leftovers',
+      badgeLabel:'Leftovers',
+      leftoversFor:batchMeal.name,
+      kids:'Reheat leftover '+batchMeal.name+' from yesterday. Serve with fresh sides.',
+      adults:'Reheat leftover '+batchMeal.name+'. Add fresh sides or a salad to mix it up.',
+      tip:'Makes use of yesterday\'s batch cook — just reheat and serve.',
+      cookTime:'10 mins (reheat)',
+      ingredients:[{n:'Leftover '+batchMeal.name,q:'all of it'}],
+      steps:[{n:1,t:'Reheat <b>'+batchMeal.name+'</b> in a pan or microwave until piping hot.'},{n:2,t:'Serve with fresh sides of your choice.'}]
+    };
+  }
+  return null;
 }
 
 function getMealPoolForDay(day){
@@ -2387,14 +2404,16 @@ document.querySelectorAll('.method-tab').forEach(function(tab){
 });
 
 function renderRecipeDayPills(){
-  var pools=['Sunday','Tuesday','Wednesday','Thursday'];
+  var pools=['🎲 Random','Sunday','Tuesday','Wednesday','Thursday'];
   ['recipe-photo-day-pills','recipe-url-day-pills','manual-day-pills'].forEach(function(id){
     var c=document.getElementById(id);if(!c)return;
     c.innerHTML='';
     pools.forEach(function(day){
       var p=document.createElement('div');
-      p.className='ob-pill'+(day==='Tuesday'?' selected':'');
-      p.textContent=day;p.dataset.day=day;
+      var isRandom=day==='🎲 Random';
+      p.className='ob-pill'+(isRandom?' selected':'');
+      p.textContent=day;
+      p.dataset.day=isRandom?'random':day;
       p.addEventListener('click',function(){
         c.querySelectorAll('.ob-pill').forEach(function(x){x.classList.remove('selected');});
         p.classList.add('selected');
@@ -2406,7 +2425,13 @@ function renderRecipeDayPills(){
 
 function getSelectedDay(pillsId){
   var sel=document.querySelector('#'+pillsId+' .ob-pill.selected');
-  return sel?sel.dataset.day:'Tuesday';
+  var day=sel?sel.dataset.day:'random';
+  if(day==='random'){
+    // Pick a random weeknight day
+    var options=['Tuesday','Wednesday','Thursday'];
+    return options[Math.floor(Math.random()*options.length)];
+  }
+  return day;
 }
 
 // Photo recipe
