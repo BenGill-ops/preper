@@ -1633,6 +1633,36 @@ function renderWeekHeader(){
 }
 
 // ── Recipe sheet ──
+// ── Recipe sheet ──
+function openRecipeFromMeal(meal){
+  // Open recipe sheet directly from a meal object (used in recipes tab)
+  document.getElementById('rsheet-day').textContent=meal.day||'';
+  document.getElementById('rsheet-title').textContent=meal.name;
+  document.getElementById('rsheet-time').textContent=meal.cookTime||'';
+  var badge=document.getElementById('rsheet-badge');
+  badge.className='badge badge-'+(meal.badge||'quick');
+  badge.textContent=meal.badgeLabel||'Quick';
+  var html='';
+  if(meal.ingredients&&meal.ingredients.length){
+    html+='<div class="rsection"><div class="rsection-title">Ingredients</div>';
+    meal.ingredients.forEach(function(ing){html+='<div class="ing-row"><span class="ing-name">'+(ing.n||ing)+'</span><span class="ing-qty">'+(ing.q||'')+'</span></div>';});
+    html+='</div>';
+  }
+  if(meal.steps&&meal.steps.length){
+    html+='<div class="rsection"><div class="rsection-title">How to make it</div>';
+    meal.steps.forEach(function(step){html+='<div class="step-row"><div class="step-num">'+step.n+'</div><div class="step-text">'+step.t+'</div></div>';});
+    html+='</div>';
+  }
+  html+='<div class="rsection"><div class="rsection-title">Versions</div>';
+  html+='<div class="ver-block"><div class="ver-block-lbl">Kids</div><div class="ver-block-txt">'+(meal.kids||'Same as adults')+'</div></div>';
+  html+='<div class="ver-block"><div class="ver-block-lbl">Adults</div><div class="ver-block-txt">'+(meal.adults||'')+'</div></div></div>';
+  document.getElementById('rsheet-body').innerHTML=html;
+  document.getElementById('rsheet-body').scrollTop=0;
+  document.getElementById('backdrop').classList.add('open');
+  document.getElementById('rsheet').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
 function openRecipe(wIdx,dIdx){
   var item=S.weeks[wIdx]&&S.weeks[wIdx][dIdx];
   if(!item||!item.meal||!item.meal.steps||!item.meal.steps.length)return;
@@ -2298,7 +2328,17 @@ function renderMealCards(items,c,filterText){
     var deleteBtn=item.isCustom?'<button class="recipe-delete-btn" data-name="'+m.name+'" title="Remove">\u{1F5D1}</button>':'';
     // Browse meals get an "+ Add" button instead
     var addBtn=!item.isCustom?'<button class="community-add-btn" data-addmeal="1">+ Add</button>':'';
-    card.innerHTML='<div class="recipe-card-head"><div class="recipe-card-name">'+m.name+'</div>'+customBadge+'<span class="badge badge-'+m.badge+'">'+b+'</span><span style="font-size:11px;color:var(--text3);margin-left:4px">'+m.cookTime+'</span>'+shareBtn+addBtn+deleteBtn+'</div><div class="recipe-card-foot"><span class="recipe-card-tip">'+(m.tip||'')+'</span>'+lastHadHtml+'</div>';
+    var hasRecipe=m.steps&&m.steps.length>0;
+    card.innerHTML='<div class="recipe-card-head'+(hasRecipe?' has-recipe':'')+'" style="'+(hasRecipe?'cursor:pointer;':'')+'"><div class="recipe-card-name">'+m.name+'</div>'+customBadge+'<span class="badge badge-'+m.badge+'">'+b+'</span><span style="font-size:11px;color:var(--text3);margin-left:4px">'+m.cookTime+'</span>'+(hasRecipe?'<span class="recipe-hint">▸ recipe</span>':'')+shareBtn+addBtn+deleteBtn+'</div><div class="recipe-card-foot"><span class="recipe-card-tip">'+(m.tip||'')+'</span>'+lastHadHtml+'</div>';
+    // Tap card head to open recipe sheet
+    if(hasRecipe){
+      var cardHead=card.querySelector('.recipe-card-head');
+      cardHead.addEventListener('click',function(e){
+        // Don't open if clicking a button
+        if(e.target.closest('button'))return;
+        openRecipeFromMeal(m);
+      });
+    }
     // Add to rotation button
     var addB=card.querySelector('[data-addmeal]');
     if(addB){
