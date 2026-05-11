@@ -1341,7 +1341,12 @@ async function generateUserMealsAndPlan(){
   await new Promise(function(r){setTimeout(r,400);});
   markStep(1,true);markStep(2,false);
   await new Promise(function(r){setTimeout(r,400);});
-  finishOnboarding(generatedMeals);
+  try{
+    finishOnboarding(generatedMeals);
+  }catch(err){
+    console.error('finishOnboarding error:',err);
+    setStatus('Error: '+err.message+' — please try skipping setup.');
+  }
   markStep(2,true);markStep(3,false);
   await new Promise(function(r){setTimeout(r,300);});
   markStep(3,true);
@@ -1416,7 +1421,14 @@ function finishOnboarding(generatedMeals){
   function launchApp(){showScreen('app-shell');applyKidsMode();refreshTab();}
   if(userDoc){
     setSyncStatus('saving');
-    userDoc.set(sanitiseForFirebase(S)).then(function(){setSyncStatus('live');launchApp();}).catch(function(e){console.error('Onboarding save failed:',e);setSyncStatus('offline');launchApp();});
+    var dataToSave;
+    try{
+      dataToSave=sanitiseForFirebase(S);
+    }catch(sanitiseErr){
+      console.error('Sanitise error:',sanitiseErr);
+      dataToSave=S;
+    }
+    userDoc.set(dataToSave).then(function(){setSyncStatus('live');launchApp();}).catch(function(e){console.error('Onboarding save failed:',e);setSyncStatus('offline');launchApp();});
   } else {
     launchApp();
   }
