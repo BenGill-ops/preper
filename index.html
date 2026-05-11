@@ -1520,9 +1520,18 @@ function buildWeek(usedNames){
     var isLeftover=leftoverDaysArr.includes(day);
 
     if(isBatch){
+      // Include default batch meals AND any user meals that could work as batch cooks
       var pool=getMealPoolForDay(day).filter(function(m){return m.badge==='batch'||m.leftoversKey;});
-      if(!pool.length)pool=getMealPoolForDay(day);
-      var meal=pickFresh(pool,[],usedNames);
+      // Also include user meals on the batch day pool
+      var userBatchMeals=(S.userMeals||[]).filter(function(m){return m.day===day||m.badge==='batch';});
+      var combinedPool=pool.concat(userBatchMeals);
+      if(!combinedPool.length)combinedPool=getMealPoolForDay(day);
+      var meal=pickFresh(combinedPool,[],usedNames);
+      // Add a "make double" tip if it's a custom meal without one
+      if(meal&&!meal.tip){meal=Object.assign({},meal,{tip:'Make extra — leftovers sort tomorrow night.'});}
+      else if(meal&&meal.tip&&meal.tip.indexOf('leftover')===-1&&meal.tip.indexOf('double')===-1){
+        meal=Object.assign({},meal,{tip:meal.tip+' Make extra for tomorrow\'s leftovers.'});
+      }
       usedNames.add(meal.name);usedMealsThisWeek.push(meal.name);
       result.push({day:day,meal:meal,done:false,leftoverOf:null,isBatchDay:true});
     } else if(isLeftover){
@@ -1833,14 +1842,40 @@ function dismissLeftover(wIdx,dayIdx,mealName){
   saveToFirebase();renderPlan();
 }
 function swapMeal(w,i){
-  var day=S.weeks[w][i].day,pool=MEALS[day],curName=S.weeks[w][i].meal.name;
+  var day=S.weeks[w][i].day;
+  var curName=S.weeks[w][i].meal.name;
+  var profile=S.profile||{};
+  var batchDay=profile.batchDay||'Sunday';
+  var leftoverDaysArr=profile.leftoverDays||['Monday'];
+  var isBatchDay=(day===batchDay);
+  // Build pool — include user meals for batch day
+  var pool=MEALS[day]||MEALS.Tuesday;
+  if(isBatchDay){
+    var userBatch=(S.userMeals||[]).filter(function(m){return m.day===day||m.badge==='batch';});
+    pool=pool.concat(userBatch);
+  }
   var recent=recentMeals(3);
   var opts=pool.filter(function(m){return m.name!==curName&&!recent.has(m.name);});
   if(!opts.length)opts=pool.filter(function(m){return m.name!==curName;});
+  if(!opts.length)opts=pool;
   swapping=i;swappingWeek=w;renderPlan();
   setTimeout(function(){
-    S.weeks[w][i].meal=rnd(opts);S.weeks[w][i].leftoverOf=null;
-    if(i===0)S.weeks[w][1].meal=getMonday(S.weeks[w][i].meal);
+    var newMeal=rnd(opts);
+    S.weeks[w][i].meal=newMeal;
+    S.weeks[w][i].leftoverOf=null;
+    // If this is the batch day, update leftover days too
+    if(isBatchDay){
+      leftoverDaysArr.forEach(function(ld){
+        var ldIdx=WEEK_DAYS.indexOf(ld);
+        if(ldIdx>=0&&S.weeks[w][ldIdx]){
+          var leftoverMeal=getLeftoverMeal(newMeal);
+          if(leftoverMeal){
+            S.weeks[w][ldIdx].meal=leftoverMeal;
+            S.weeks[w][ldIdx].leftoverOf=newMeal.name;
+          }
+        }
+      });
+    }
     swapping=null;swappingWeek=null;saveToFirebase();renderPlan();
   },700);
 }
