@@ -2876,18 +2876,28 @@ function renderProfileSummary(){
   if(!p.setupDone)return;
   var div=document.createElement('div');
   div.id='profile-summary';
-  div.className='profile-summary';
-  var rows=[
-    ['Family',p.familyName||'—'],
-    ['Adults',p.adults||'—'],
-    ['Kids',p.kids!=null?p.kids:'—'],
-    ['Cook time',p.cookTime||'—'],
-    ['Dietary',(p.dietary&&p.dietary.length?p.dietary.join(', '):'None')]
-  ];
-  div.innerHTML=rows.map(function(r){
-    return '<div class="profile-row"><span class="profile-row-label">'+r[0]+'</span><span class="profile-row-value">'+r[1]+'</span></div>';
-  }).join('');
-  // Insert at top of menu
+  div.style.cssText='padding:8px 12px 10px;border-bottom:0.5px solid var(--border);margin-bottom:6px';
+  // Name line
+  var nameEl=document.createElement('div');
+  nameEl.style.cssText='font-size:13px;color:var(--text2);font-weight:500;margin-bottom:6px';
+  nameEl.textContent=p.familyName||'My family';
+  div.appendChild(nameEl);
+  // Details as small pills
+  var details=[
+    p.adults+' adult'+(p.adults!==1?'s':''),
+    p.kids+' kid'+(p.kids!==1?'s':''),
+    p.cookTime||'',
+    (p.dietary&&p.dietary.length&&p.dietary[0]!=='None')?p.dietary.join(', '):''
+  ].filter(Boolean);
+  var pillsEl=document.createElement('div');
+  pillsEl.style.cssText='display:flex;flex-wrap:wrap;gap:4px';
+  details.forEach(function(d){
+    var pill=document.createElement('span');
+    pill.style.cssText='font-size:11px;color:var(--text3);background:var(--bg3);padding:2px 8px;border-radius:20px;border:0.5px solid var(--border)';
+    pill.textContent=d;
+    pillsEl.appendChild(pill);
+  });
+  div.appendChild(pillsEl);
   menu.insertBefore(div,menu.firstChild);
 }
 
