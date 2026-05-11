@@ -814,7 +814,23 @@ var DEFAULT_MEALS={
   ]
 };
 
-var DEFAULT_PANTRY=['Olive oil','Vegetable oil','Coconut oil','Salt','Black pepper','Garlic powder','Onion powder','Paprika','Smoked paprika','Cumin','Dried oregano','Mixed herbs','Chilli flakes','Chilli powder','Turmeric','Cinnamon','Curry powder','Garam masala','Soy sauce','Fish sauce','Oyster sauce','Hoisin sauce','Worcestershire sauce','Sesame oil','Sriracha','Ketchup','Tomato sauce','BBQ sauce','Mustard','Mayonnaise','Sweet chilli sauce','Hot sauce','Tomato paste','Chicken stock','Beef stock','Vegetable stock','Plain flour','Self-raising flour','Cornflour','Breadcrumbs','Panko breadcrumbs','Sugar','Brown sugar','Honey','Maple syrup','Rice','Pasta','Spaghetti','Egg noodles','Rice noodles','Canned tomatoes','Canned chickpeas','Canned lentils','Canned corn','Coconut milk','Peanut butter','Nutella','Jam','Vegemite','Butter','Eggs','Milk','Cream','Cheese','Parmesan','Onions','Garlic','Ginger','Potatoes','Sesame seeds','Olive oil spray','Baking powder','Bicarb soda','Vanilla extract','Oats','Cereal','Weet-Bix','Rice crackers','Vinegar','Apple cider vinegar','Red wine vinegar','Lemon juice','Soy milk','Almond milk','Peanuts','Almonds','Walnuts','Dried pasta','Lasagne sheets','Couscous','Quinoa','Tinned tuna','Tinned salmon','Baked beans','Peas','Corn kernels','Frozen spinach','Tomato passata','Dijon mustard','Wholegrain mustard','Tabasco','Mirin','Rice wine vinegar','Tahini','Olive tapenade','Sun-dried tomatoes','Capers','Anchovies','Stock cubes','Gravy powder','Cornstarch','Icing sugar','Cocoa powder','Chocolate chips','Dried fruit','Sultanas'];
+var PANTRY_SECTIONS=[
+  {label:'🧊 Fridge',items:['Butter','Eggs','Milk','Cream','Cheese','Parmesan','Greek yoghurt','Sour cream','Bacon','Salami']},
+  {label:'🥦 Fresh Produce',items:['Onions','Garlic','Ginger','Potatoes','Carrots','Celery','Lemon','Lime','Fresh chilli','Spring onions']},
+  {label:'🫙 Oils & Vinegars',items:['Olive oil','Vegetable oil','Coconut oil','Sesame oil','Olive oil spray','Vinegar','Apple cider vinegar','Red wine vinegar','Rice wine vinegar','Mirin']},
+  {label:'🧂 Herbs & Spices',items:['Salt','Black pepper','Garlic powder','Onion powder','Paprika','Smoked paprika','Cumin','Dried oregano','Mixed herbs','Chilli flakes','Chilli powder','Turmeric','Cinnamon','Curry powder','Garam masala','Bay leaves','Dried thyme','Dried rosemary']},
+  {label:'🍜 Asian Sauces',items:['Soy sauce','Fish sauce','Oyster sauce','Hoisin sauce','Sesame oil','Sriracha','Sweet chilli sauce','Mirin','Rice wine vinegar','Tahini','Chilli oil','Kecap manis']},
+  {label:'🍅 Western Sauces',items:['Ketchup','Tomato sauce','BBQ sauce','Mustard','Dijon mustard','Wholegrain mustard','Mayonnaise','Hot sauce','Tabasco','Worcestershire sauce','Tomato paste','Tomato passata']},
+  {label:'🥫 Tins & Jars',items:['Canned tomatoes','Canned chickpeas','Canned lentils','Canned corn','Coconut milk','Tinned tuna','Tinned salmon','Baked beans','Peanut butter','Nutella','Jam','Vegemite','Sun-dried tomatoes','Capers','Anchovies','Olive tapenade']},
+  {label:'🍚 Grains & Pasta',items:['Rice','Pasta','Spaghetti','Egg noodles','Rice noodles','Lasagne sheets','Couscous','Quinoa','Dried pasta','Oats','Breadcrumbs','Panko breadcrumbs','Rice crackers','Weet-Bix','Cereal']},
+  {label:'🧁 Baking',items:['Plain flour','Self-raising flour','Cornflour','Sugar','Brown sugar','Honey','Maple syrup','Baking powder','Bicarb soda','Vanilla extract','Icing sugar','Cocoa powder','Chocolate chips','Dried fruit','Sultanas']},
+  {label:'🍲 Stocks & Cooking',items:['Chicken stock','Beef stock','Vegetable stock','Stock cubes','Gravy powder','Cornstarch','Lemon juice']},
+  {label:'❄️ Freezer',items:['Peas','Corn kernels','Frozen spinach','Frozen edamame','Frozen berries']},
+  {label:'🥜 Nuts & Seeds',items:['Sesame seeds','Peanuts','Almonds','Walnuts','Pine nuts','Sunflower seeds']},
+  {label:'🥛 Dairy Alternatives',items:['Soy milk','Almond milk','Oat milk','Coconut cream']}
+];
+// Flat list for backwards compatibility
+var DEFAULT_PANTRY=PANTRY_SECTIONS.reduce(function(acc,s){return acc.concat(s.items);},[]);
 var CAT_MAP={'Beef mince':'Meat','Chicken breast':'Meat','Whole chicken':'Meat','Whole chickens':'Meat','Lamb shoulder':'Meat','Pork shoulder':'Meat','Carrot':'Produce','Celery':'Produce','Onion':'Produce','Garlic':'Produce','Fresh basil':'Produce','Potatoes':'Produce','Broccoli':'Produce','Avocados':'Produce','Lime':'Produce','Spring onions':'Produce','Fresh ginger':'Produce','Cucumber':'Produce','Fresh coriander':'Produce','Lemon':'Produce','Cabbage':'Produce','Fresh thyme':'Produce','Fresh parsley':'Produce','Rocket':'Produce','Zucchini':'Produce','Carrots':'Produce','Cherry tomatoes':'Produce','Slaw mix':'Produce','Parmesan':'Dairy','Ricotta':'Dairy','Greek yoghurt':'Dairy','Cheddar cheese':'Dairy','Mozzarella':'Dairy','Cream':'Dairy','Butter chicken sauce':'Pantry','Pesto':'Pantry','Pizza sauce':'Pantry','BBQ sauce':'Pantry','Crushed tomatoes':'Pantry','Mild salsa':'Pantry','Chipotle sauce':'Pantry','Sun-dried tomatoes':'Pantry','Garam masala':'Pantry','Pappardelle pasta':'Pantry','Penne pasta':'Pantry','Pasta':'Pantry','Egg noodles':'Pantry','Steamed rice':'Pantry','Sourdough bread':'Bakery','Soft bread rolls':'Bakery','Flatbreads':'Bakery','Soft taco shells':'Bakery','Soft wraps':'Bakery','Naan bread':'Bakery','Crusty bread':'Bakery','Frozen peas':'Frozen','Red wine':'Other','White wine':'Other','Chilli oil':'Other','Olives':'Other','Pickled jalapeños':'Other','Prosciutto':'Other','Sliced ham':'Other','Hot sauce':'Other','Sriracha':'Other','Mayonnaise':'Other'};
 var WEEK_DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday']; // overridden by profile
 var NUM_WEEKS=4;
@@ -1236,16 +1252,22 @@ function addStaleMeal(){
 function renderObPantryGrid(){
   var grid=document.getElementById('ob-pantry-grid');if(!grid)return;
   grid.innerHTML='';
-  DEFAULT_PANTRY.forEach(function(s){
-    var el=document.createElement('div');
-    el.className='p-chip'+(obData.pantryTicked.includes(s)?' active':'');
-    el.innerHTML='<div class="p-dot"></div><span>'+s+'</span>';
-    el.addEventListener('click',function(){
-      var idx=obData.pantryTicked.indexOf(s);
-      if(idx>=0)obData.pantryTicked.splice(idx,1);else obData.pantryTicked.push(s);
-      el.classList.toggle('active',obData.pantryTicked.includes(s));
+  PANTRY_SECTIONS.forEach(function(section){
+    var lbl=document.createElement('div');
+    lbl.style.cssText='font-size:11px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin:14px 0 8px;padding-bottom:6px;border-bottom:0.5px solid var(--border);grid-column:1/-1';
+    lbl.textContent=section.label;
+    grid.appendChild(lbl);
+    section.items.forEach(function(s){
+      var el=document.createElement('div');
+      el.className='p-chip'+(obData.pantryTicked.includes(s)?' active':'');
+      el.innerHTML='<div class="p-dot"></div><span>'+s+'</span>';
+      el.addEventListener('click',function(){
+        var idx=obData.pantryTicked.indexOf(s);
+        if(idx>=0)obData.pantryTicked.splice(idx,1);else obData.pantryTicked.push(s);
+        el.classList.toggle('active',obData.pantryTicked.includes(s));
+      });
+      grid.appendChild(el);
     });
-    grid.appendChild(el);
   });
 }
 
@@ -1935,18 +1957,34 @@ function renderShoppingList(){
 // ── Pantry ──
 function renderPantry(){
   var grid=document.getElementById('pantry-grid');grid.innerHTML='';
-  var all=DEFAULT_PANTRY.concat((S.customStaples||[]).filter(function(s){return !DEFAULT_PANTRY.includes(s);}));
-  all.forEach(function(s){
+  var customItems=(S.customStaples||[]).filter(function(s){return !DEFAULT_PANTRY.includes(s);});
+  function makeChip(s){
     var el=document.createElement('div');
     el.className='p-chip'+((S.pantryStaples||[]).includes(s)?' active':'');
     el.innerHTML='<div class="p-dot"></div><span>'+s+'</span>';
     el.addEventListener('click',function(){
       var idx=(S.pantryStaples||[]).indexOf(s);
       if(idx>=0)S.pantryStaples.splice(idx,1);else S.pantryStaples.push(s);
-      saveToFirebase();renderPantry();
+      saveToFirebase();el.classList.toggle('active',(S.pantryStaples||[]).includes(s));
     });
-    grid.appendChild(el);
+    return el;
+  }
+  // Render each section
+  PANTRY_SECTIONS.forEach(function(section){
+    var lbl=document.createElement('div');
+    lbl.style.cssText='font-size:11px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin:14px 0 8px;padding-bottom:6px;border-bottom:0.5px solid var(--border);grid-column:1/-1';
+    lbl.textContent=section.label;
+    grid.appendChild(lbl);
+    section.items.forEach(function(s){grid.appendChild(makeChip(s));});
   });
+  // Custom staples at bottom
+  if(customItems.length){
+    var customLbl=document.createElement('div');
+    customLbl.style.cssText='font-size:11px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--text3);margin:14px 0 8px;padding-bottom:6px;border-bottom:0.5px solid var(--border);grid-column:1/-1';
+    customLbl.textContent='⭐ My custom staples';
+    grid.appendChild(customLbl);
+    customItems.forEach(function(s){grid.appendChild(makeChip(s));});
+  }
 }
 function addCustomStaple(){
   var inp=document.getElementById('pantry-input'),v=inp.value.trim();if(!v)return;
