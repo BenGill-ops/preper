@@ -903,8 +903,15 @@ document.addEventListener('click',function(e){
 });
 document.getElementById('acct-signout').addEventListener('click',function(){auth.signOut();});
 document.getElementById('acct-reset').addEventListener('click',function(){
-  if(confirm('This will reset your meal plan and redo the setup. Are you sure?')){
-    S.profile={};S.weeks=[];S.mealHistory=[];S.userMeals=[];
+  if(confirm('This will reset your meal plan and redo the setup. Your saved recipes will be kept. Are you sure?')){
+    // Keep userMeals and sharedRecipes — only reset plan/profile/history
+    S.profile={};
+    S.weeks=[];
+    S.mealHistory=[];
+    S.leftoverDays={};
+    S.checkedItems=[];
+    S.notes1='';S.notes2='';S.notes3='';
+    // Keep: S.userMeals, S.sharedRecipes, S.pantryStaples, S.customStaples
     saveToFirebase();
     startOnboarding();
   }
@@ -2588,7 +2595,12 @@ function saveCustomRecipe(meal){
   mergeUserMeals(S.userMeals);
   saveToFirebase();
   renderFavourites();
-  alert('"'+meal.name+'" added to your '+meal.day+' meal rotation!');
+  // Ask if they want to share with community
+  setTimeout(function(){
+    if(confirm('"'+meal.name+'" has been added to your rotation!\n\nWould you like to share it with the Preper community so others can discover it?')){
+      shareRecipeToCommmunity(meal.name);
+    }
+  },300);
 }
 
 // ── Choose your own meal ──
